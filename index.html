@@ -8,14 +8,15 @@
     <!-- jQuery -->
     <script src="libs/jquery/jquery-3.4.1.min.js"></script>
 
-    <!-- Highlight -->
-    <link rel="stylesheet" href="libs/highlight/styles/atelier-cave-dark.css">
-    <script src="libs/highlight/highlight.pack.js"></script>
+<!--    &lt;!&ndash; Highlight &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="libs/highlight/styles/atelier-cave-dark.css">-->
+<!--    <script src="libs/highlight/highlight.pack.js"></script>-->
 
     <!-- Quill -->
-    <link rel="stylesheet" type="text/css" href="libs/quill/quill.bubble.css" />
-    <script type="text/javascript" src="libs/quill/quill.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.quilljs.com/1.0.0/quill.core.css" />
+    <script type="text/javascript" src="//cdn.quilljs.com/1.0.0/quill.core.js"></script>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     <!-- My stuff -->
     <link rel="stylesheet" type="text/css" href="styles.css">
 
@@ -44,13 +45,26 @@
 </head>
 
 <body>
-    <button id="delta">Show delta in console</button>
-    <button id="text">Show text in console</button>
-    <button id="mathjax">Add MathJax</button>
-    <button id="disable">Disable</button>
-    <div id="editor"></div>
+    <div id="tooltip-controls">
+        <button id="bold-button"><i class="fa fa-bold"></i></button>
+        <button id="italic-button"><i class="fa fa-italic"></i></button>
+        <button id="link-button"><i class="fa fa-link"></i></button>
+        <button id="blockquote-button"><i class="fa fa-quote-right"></i></button>
+        <button id="header-1-button"><i class="fa fa-header"><sub>1</sub></i></button>
+        <button id="header-2-button"><i class="fa fa-header"><sub>2</sub></i></button>
+    </div>
+    <div id="sidebar-controls">
+        <button id="tweet-button"><i class="fa fa-twitter"></i></button>
+        <button id="divider-button"><i class="fa fa-minus"></i></button>
+    </div>
+    <div id="editor-container">Tell your story...</div>
+<!--    <button id="delta">Show delta in console</button>-->
+<!--    <button id="text">Show text in console</button>-->
+<!--    <button id="mathjax">Add MathJax</button>-->
+<!--    <button id="disable">Disable</button>-->
+<!--    <div id="editor"></div>-->
 
-    <small>More details on <a href="https://lucidar.me/en/rich-content-editor/mathjax-and-quill-editor" target="_blank">this page</a>.</small>
+<!--    <small>More details on <a href="https://lucidar.me/en/rich-content-editor/mathjax-and-quill-editor" target="_blank">this page</a>.</small>-->
 
 
 
