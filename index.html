@@ -13,14 +13,23 @@
     <script src="libs/highlight/highlight.pack.js"></script>
 
     <!-- Quill -->
-    <link rel="stylesheet" type="text/css" href="libs/quill/quill.snow.css" />
+    <link rel="stylesheet" type="text/css" href="libs/quill/quill.bubble.css" />
     <script type="text/javascript" src="libs/quill/quill.js"></script>
 
     <!-- My stuff -->
     <link rel="stylesheet" type="text/css" href="styles.css">
 
     <script>
+        window.mathjax_loaded = false
         MathJax = {
+            startup: {
+                ready:()=>{
+                    console.log('MathJax is loaded, but not yet initialized');
+                    MathJax.startup.defaultReady();
+                    console.log('MathJax is initialized, and the initial typeset is queued');
+
+                }
+            },
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']]
             },
@@ -29,7 +38,7 @@
             }
         };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
+    <script type="text/javascript" id="MathJax-script"
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
     </script>
 </head>

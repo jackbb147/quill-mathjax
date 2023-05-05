@@ -2,7 +2,10 @@
 // Import parchment and delta for creating custom module
 const Parchment = Quill.imports.parchment;
 const Delta = Quill.imports.delta;
+
 let Inline = Quill.import('blots/inline');
+const Tooltip = Quill.import('ui/tooltip');
+
 
 
 // Extend the embed
@@ -73,7 +76,7 @@ class Mathjax extends Inline{
         MathJaxNode.style.visibility = "hidden";
         MathJaxNode.innerHTML = '\\(' + latex + '\\)';
         document.body.appendChild(MathJaxNode);
-        MathJax.typeset();
+        // MathJax.typeset();
         let svg = MathJaxNode.innerHTML;
         document.body.removeChild(MathJaxNode);
         return svg;
@@ -95,10 +98,28 @@ Mathjax.tagName = 'CODE';
 // Register the module
 Quill.register(Mathjax);
 
+
+class MyToolTip extends Tooltip{
+    constructor(quill, bounds) {
+        super(quill, bounds);
+    }
+}
+
+
+// This is the innerHTML of the tooltip.
+// https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
+MyToolTip.TEMPLATE = `
+<!--<span>hello</span>-->
+<span>I wrote this template myself: ${MathJax.tex2svg('\\int').outerHTML}</span>
+`
+
+var CODES = []
+for(var i = 0; i < 222; i++)
+    CODES.push(i);
 // Initialize Quill editor
 var quill = new Quill('#editor', {
     placeholder: 'Click the MathJax button to insert a formula.',
-    theme: 'snow',
+    theme: 'bubble',
     modules: {
         toolbar:
             [
@@ -111,20 +132,51 @@ var quill = new Quill('#editor', {
             ],
 
         keyboard: {
-            bindings: {
-                mathjax: {
-                    key: "backspace",
-                    format: ["list"],
-                    handler: function(range, context){
-                        alert("backspace fired")
-                    }
-                }
-            }
+            // bindings: {
+            //     formula: {
+            //         // key: 'backspace',
+            //         key: ()=>true,
+            //         format: ["mathjax"],
+            //         handler: function(range, context){
+            //             // alert("backspace fired")
+            //             console.log("backspace fired in formula", range, context)
+            //
+            //         }
+            //     }
+            // }
         }
     },
 });
 
+
+// var mFormat = quill.getFormat('mathjax')
+// mFormat.on('text-change', (delta, oldDelta, source)=>{
+//     console.log(delta, oldDelta, source)
+// })
+let myTooltip = new MyToolTip(quill);
+window.tooltip = myTooltip
+
+myTooltip.show()
 window.quill = quill;
+
+quill.on("text-change", (delta, oldDelta, source)=>{
+    console.log(delta, oldDelta, source)
+    // The current blot that the user is typing in
+    let blot = quill.getLeaf(quill.getSelection().index)[0] //https://quilljs.com/docs/api/#events
+
+    let text = blot.text;
+
+    // This is literally a html element <mjx-container>...</mjx-container>
+    let formulaHTMLElement = MathJax.tex2svg(text);
+
+    myTooltip.root.innerHTML = formulaHTMLElement.outerHTML;
+
+
+
+
+
+    console.log("blot: ", blot,text, formulaHTMLElement)
+})
 
 // Display the current delta content of the editor in the console
 document.getElementById('delta').onclick = () => {
@@ -147,8 +199,6 @@ document.getElementById('mathjax').onclick = () => {
     var range = quill.getSelection(true);
     quill.deleteText(range.index, range.length);
 
-
-    // quill.insertEmbed(range.index, 'mathjax', latex);
     quill.insertText(range.index, latex, {mathjax: true})
 
 
@@ -159,7 +209,7 @@ document.getElementById('mathjax').onclick = () => {
 
 document.getElementById("text").onclick = ()=>{
     /* console.log(quill.root.innerHTML) */
-    /* var md = window.markdownit() */;
+    /* var md = window.markdownit() */
 
     var html = quill.root.innerHTML
     /*   var markdown = toMarkdown();
