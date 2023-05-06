@@ -64,7 +64,7 @@ TexBlot.className = 'texblot'
 class TweetBlot extends  InlineEmbed {
     static create(latex) {
 
-        tooltip.hide()
+        // tooltip.hide()
         let node = super.create();
 
 
@@ -73,14 +73,14 @@ class TweetBlot extends  InlineEmbed {
 
 
         node.style.display = "inline"
-        node.style.border = "1px solid red"
+        // node.style.border = "1px solid red"
 
 
         node.setAttribute('latex', latex);
         // var mjx = MathJax.tex2svg(latex);
-        var mjx = MathJax.tex2mml(latex);
+        var mjx = MathJax.tex2svg(latex);
         // node.appendChild(mjx)
-        node.innerHTML = mjx;
+        node.innerHTML = mjx.outerHTML;
         // debugger;
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
@@ -93,9 +93,9 @@ class TweetBlot extends  InlineEmbed {
             let formula = node.getAttribute('latex')
             // debugger;
 
-            let formulaHTML = MathJax.tex2mml(latex);
+            let formulaHTML = MathJax.tex2svg(latex);
             tooltip.show()
-            tooltip.root.innerHTML = formulaHTML;
+            tooltip.root.innerHTML = formulaHTML.outerHTML;
             // debugger;
             let bounds = quill.getBounds(quill.getIndex(getBlot()));
 
@@ -124,20 +124,6 @@ class TweetBlot extends  InlineEmbed {
 
 
 
-    // format(format, value){
-    //
-    //     //     TODO
-    //     let latex = node.getAttribute('latex')
-    //     console.log("format fired", this.domNode, latex)
-    //     var mjx = MathJax.tex2mml(latex);
-    //     node.innerHTML = mjx;
-    //     node.contentEditable = 'true'
-    //     let mathNode = node.firstChild;
-    //     mathNode.removeAttribute("display")
-    //     mathNode.style["math-style"] = "normal"
-    //
-    //     node.setAttribute('editing', "false")
-    // }
 
     static value(domNode) {
         return domNode.getAttribute('latex')
@@ -190,11 +176,11 @@ let quill = new Quill('#editor-container', {
                         // alert("enter fired!")
                         let formula = context.prefix + context.suffix;
                         console.log("enter fired in inlinetex",range, context, formula, formula.length)
-                        var mjx = MathJax.tex2mml(formula);
-
+                        // var mjx = MathJax.tex2svg(formula);
+                        tooltip.hide()
                         let begin = range.index - context.prefix.length;
                         let count = formula.length;
-                        console.log("begin: ", begin, " count: ", count , mjx)
+                        // console.log("begin: ", begin, " count: ", count , mjx)
                         quill.deleteText(begin, count)
                         quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
                         return false;
@@ -235,10 +221,14 @@ class MyToolTip extends Tooltip{
 // https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
 MyToolTip.TEMPLATE = `
 <!--<span>hello</span>-->
-<span>I wrote this template myself: ${MathJax.tex2svg('\\int').outerHTML}</span>
+<span>I wrote this template myself: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
 `
 
+
+
 let tooltip = new MyToolTip(quill);
+
+tooltip.show()
 window.tooltip = tooltip
 
 
@@ -254,9 +244,9 @@ quill.on("text-change", (delta, oldDelta, source)=>{
         let begin = delta.ops[0].retain;
         let blot = quill.getLeaf(begin)
         let formula = blot[0].text;
-        let typesetted = MathJax.tex2mml(formula);
+        let typesetted = MathJax.tex2svg(formula);
         console.log(typesetted)
-        tooltip.root.innerHTML = typesetted;
+        tooltip.root.innerHTML = typesetted.outerHTML;
         tooltip.show()
 }})
 $('#bold-button').click(function() {
