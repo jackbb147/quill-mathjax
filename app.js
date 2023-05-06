@@ -98,7 +98,6 @@ class TweetBlot extends  InlineEmbed {
             quill.insertText(begin, formula, {inlinetex: true})
             tooltip.show()
 
-
         })
 
         //
@@ -168,7 +167,14 @@ let quill = new Quill('#editor-container', {
     modules:{
         keyboard: {
             bindings:{
-                formula: {
+                // backspace: {
+                //     key: 'backspace',
+                //     format: ['inlinetex'],
+                //     handler: (range, context)=>{
+                //     //TODO
+                //     }
+                // },
+                enter: {
                     key: 'enter',
                     format:['inlinetex'],
                     handler: function(range, context) {
@@ -225,22 +231,18 @@ quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlin
 
 
 quill.on("text-change", (delta, oldDelta, source)=>{
-    let insert = delta.ops[1];
-    let attributes = insert.attributes;
-    if(insert && attributes && attributes.inlinetex){
-        // console.log(insert, oldDelta, source,delta)
+    console.log("text changed", delta)
+
+    let blotName = quill.getLeaf(quill.getSelection().index)[0].parent.constructor.blotName
+    console.log(blotName)
+    if(blotName === 'inlinetex'){
         let begin = delta.ops[0].retain;
         let blot = quill.getLeaf(begin)
-
-        // console.log(blot)
-
         let formula = blot[0].text;
         let typesetted = MathJax.tex2mml(formula);
         console.log(typesetted)
         tooltip.root.innerHTML = typesetted;
         tooltip.show()
-    // }
-
 }})
 $('#bold-button').click(function() {
     quill.format('bold', true);
