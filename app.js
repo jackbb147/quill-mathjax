@@ -2,6 +2,7 @@ let Inline = Quill.import('blots/inline');
 let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
+const Tooltip = Quill.import('ui/tooltip');
 
 // let Text = Quill.import('blots/block/text')
 // window.Text = Text
@@ -58,6 +59,8 @@ TexBlot.className = 'texblot'
 
 class TweetBlot extends  InlineEmbed {
     static create(latex) {
+
+        tooltip.hide()
         let node = super.create();
 
 
@@ -93,6 +96,7 @@ class TweetBlot extends  InlineEmbed {
             quill.deleteText(begin,1)
 
             quill.insertText(begin, formula, {inlinetex: true})
+            tooltip.show()
 
         })
 
@@ -159,6 +163,7 @@ Quill.register(TexBlot)
 
 
 let quill = new Quill('#editor-container', {
+    theme: "bubble",
     modules:{
         keyboard: {
             bindings:{
@@ -196,8 +201,46 @@ let quill = new Quill('#editor-container', {
         }}
 });
 
+
+class MyToolTip extends Tooltip{
+    constructor(quill, bounds) {
+        super(quill, bounds);
+    }
+}
+
+
+// This is the innerHTML of the tooltip.
+// https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
+MyToolTip.TEMPLATE = `
+<!--<span>hello</span>-->
+<span>I wrote this template myself: ${MathJax.tex2svg('\\int').outerHTML}</span>
+`
+
+let tooltip = new MyToolTip(quill);
+window.tooltip = tooltip
+
+
 quill.insertText(4, String.raw `\vec{F} = m\vec{a}`, {inlinetex: true})
 
+
+quill.on("text-change", (delta, oldDelta, source)=>{
+    let insert = delta.ops[1];
+    let attributes = insert.attributes;
+    if(insert && attributes && attributes.inlinetex){
+        // console.log(insert, oldDelta, source,delta)
+        let begin = delta.ops[0].retain;
+        let blot = quill.getLeaf(begin)
+
+        // console.log(blot)
+
+        let formula = blot[0].text;
+        let typesetted = MathJax.tex2mml(formula);
+        console.log(typesetted)
+        tooltip.root.innerHTML = typesetted;
+        tooltip.show()
+    // }
+
+}})
 $('#bold-button').click(function() {
     quill.format('bold', true);
 });
@@ -235,8 +278,9 @@ $('#tweet-button').click(function() {
     let range = quill.getSelection(true);
     let latex = String.raw `\int f(x)dx = F(x)+C`;
     // quill.insertText(range.index, '\n', Quill.sources.USER);
-    quill.insertEmbed(range.index + 1, 'mathbox-inline', latex, Quill.sources.USER);
-    quill.setSelection(range.index + 2, Quill.sources.SILENT);
+    quill.insertText(range.index, String.raw `\vec{F} = m\vec{a}`, {inlinetex: true})
+    // quill.insertEmbed(range.index + 1, 'mathbox-inline', latex, Quill.sources.USER);
+    // quill.setSelection(range.index + 2, Quill.sources.SILENT);
 });
 //
 // // Import parchment and delta for creating custom module
