@@ -98,6 +98,13 @@ class TweetBlot extends  InlineEmbed {
             quill.insertText(begin, formula, {inlinetex: true})
             tooltip.show()
 
+            console.log(e)
+
+            // to prevent buggy behavior related to cursor position
+            // being updated prematurely upon click
+            e.preventDefault()
+            e.stopPropagation()
+
         })
 
         //
