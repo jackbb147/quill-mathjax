@@ -90,20 +90,14 @@ class TweetBlot extends  InlineEmbed {
 
             console.log('clicked mathbox.', quill.getSelection())
             //TODO delete myself and replace with a format
-            let begin = quill.getSelection().index;
-            console.log(quill.getSelection().index,"begin: ", begin)
+
+            let begin = quill.getSelection().index - 1;
             let formula = node.getAttribute('latex')
-            quill.deleteText(begin,1)
+            node.remove()
 
             quill.insertText(begin, formula, {inlinetex: true})
             tooltip.show()
 
-            console.log(e)
-
-            // to prevent buggy behavior related to cursor position
-            // being updated prematurely upon click
-            e.preventDefault()
-            e.stopPropagation()
 
         })
 
@@ -227,7 +221,7 @@ let tooltip = new MyToolTip(quill);
 window.tooltip = tooltip
 
 
-quill.insertText(4, String.raw `\vec{F} = m\vec{a}`, {inlinetex: true})
+quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
 
 
 quill.on("text-change", (delta, oldDelta, source)=>{
