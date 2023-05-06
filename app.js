@@ -87,11 +87,18 @@ class TweetBlot extends  InlineEmbed {
         mathNode.style["math-style"] = "normal"
         // node.setAttribute('editing', 'false')
 
+        node.addEventListener('mousedown', e=>{
+
+        })
+
 
         node.addEventListener('mouseup', (e)=>{
-            let begin = quill.getSelection().index - 1;
+            // debugger;
+            let begin = quill.getIndex(node.__blot.blot)
             let formula = node.getAttribute('latex')
             // debugger;
+
+
 
             let formulaHTML = MathJax.tex2svg(latex);
             tooltip.show()
@@ -105,8 +112,9 @@ class TweetBlot extends  InlineEmbed {
             tooltip.root.style.top = `${bounds.bottom}px`;
             tooltip.root.style.left = `${bounds.left}px`;
 
-            node.remove()
             quill.insertText(begin, formula, {inlinetex: true})
+            node.remove()
+
         })
 
         //
@@ -221,7 +229,7 @@ class MyToolTip extends Tooltip{
 // https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
 MyToolTip.TEMPLATE = `
 <!--<span>hello</span>-->
-<span>I wrote this template myself: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
+<span>A template: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
 `
 
 
