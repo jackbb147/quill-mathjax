@@ -87,9 +87,6 @@ class TweetBlot extends  InlineEmbed {
         mathNode.style["math-style"] = "normal"
         // node.setAttribute('editing', 'false')
 
-        node.addEventListener('mousedown', e=>{
-
-        })
 
 
         node.addEventListener('mouseup', (e)=>{
@@ -99,7 +96,8 @@ class TweetBlot extends  InlineEmbed {
             // debugger;
 
 
-
+            quill.insertText(begin, formula, {inlinetex: true})
+            node.remove()
             let formulaHTML = MathJax.tex2svg(latex);
             tooltip.show()
             tooltip.root.innerHTML = formulaHTML.outerHTML;
@@ -112,8 +110,7 @@ class TweetBlot extends  InlineEmbed {
             tooltip.root.style.top = `${bounds.bottom}px`;
             tooltip.root.style.left = `${bounds.left}px`;
 
-            quill.insertText(begin, formula, {inlinetex: true})
-            node.remove()
+
 
         })
 
