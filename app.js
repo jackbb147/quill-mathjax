@@ -3,6 +3,8 @@ let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
 
+// let Text = Quill.import('blots/block/text')
+// window.Text = Text
 class BoldBlot extends Inline { }
 BoldBlot.blotName = 'bold';
 BoldBlot.tagName = 'strong';
@@ -42,9 +44,26 @@ class DividerBlot extends BlockEmbed { }
 DividerBlot.blotName = 'divider';
 DividerBlot.tagName = 'hr';
 
-class TweetBlot extends InlineEmbed {
+class TexBlot extends InlineEmbed {
+
+}
+
+/**
+ * TweetBlot.blotName = 'mathbox-inline';
+ * TweetBlot.tagName = 'div';
+ * TweetBlot.className = 'mathbox-inline'; */
+TexBlot.blotName = 'texblot'
+TexBlot.tagName = 'code'
+TexBlot.className = 'texblot'
+
+class TweetBlot extends  InlineEmbed {
     static create(latex) {
         let node = super.create();
+
+
+        node.contentEditable = "false"
+
+
 
         node.style.display = "inline"
         node.style.border = "1px solid red"
@@ -55,23 +74,80 @@ class TweetBlot extends InlineEmbed {
         var mjx = MathJax.tex2mml(latex);
         // node.appendChild(mjx)
         node.innerHTML = mjx;
-
-        //
+        // debugger;
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
+        // node.setAttribute('editing', 'false')
+
+
+
+
+        node.addEventListener('mousedown',(e)=>{
+
+            console.log('clicked mathbox.', quill.getSelection())
+            //TODO delete myself and replace with a format
+            let begin = quill.getSelection().index;
+            console.log(quill.getSelection().index,"begin: ", begin)
+            let formula = node.getAttribute('latex')
+            quill.deleteText(begin,1)
+
+            quill.insertText(begin, formula, {inlinetex: true})
+
+        })
+
+        //
+        // let mathNode = node.firstChi;
+        // mathNode.removeAttribute("display")
+        // mathNode.style["math-style"] = "normal"
         window.node = node;
+
+
         return node;
     }
 
+
+
+
+
+
+    // format(format, value){
+    //
+    //     //     TODO
+    //     let latex = node.getAttribute('latex')
+    //     console.log("format fired", this.domNode, latex)
+    //     var mjx = MathJax.tex2mml(latex);
+    //     node.innerHTML = mjx;
+    //     node.contentEditable = 'true'
+    //     let mathNode = node.firstChild;
+    //     mathNode.removeAttribute("display")
+    //     mathNode.style["math-style"] = "normal"
+    //
+    //     node.setAttribute('editing', "false")
+    // }
+
     static value(domNode) {
-        return domNode.dataset.id;
+        return domNode.getAttribute('latex')
     }
 }
 TweetBlot.blotName = 'mathbox-inline';
 TweetBlot.tagName = 'div';
 TweetBlot.className = 'mathbox-inline';
 
+
+
+
+class InlineTex extends Inline {
+
+}
+
+InlineTex.blotName = 'inlinetex'
+InlineTex.tagName = 'code'
+InlineTex.className = 'inlinetex'
+
+
+
+Quill.register(InlineTex)
 Quill.register(BoldBlot);
 Quill.register(ItalicBlot);
 Quill.register(LinkBlot);
@@ -79,9 +155,48 @@ Quill.register(BlockquoteBlot);
 Quill.register(HeaderBlot);
 Quill.register(DividerBlot);
 Quill.register(TweetBlot);
+Quill.register(TexBlot)
 
 
-let quill = new Quill('#editor-container');
+let quill = new Quill('#editor-container', {
+    modules:{
+        keyboard: {
+            bindings:{
+                formula: {
+                    key: 'enter',
+                    format:['inlinetex'],
+                    handler: function(range, context) {
+                        // alert("enter fired!")
+                        let formula = context.prefix + context.suffix;
+                        console.log("enter fired in inlinetex",range, context, formula, formula.length)
+                        var mjx = MathJax.tex2mml(formula);
+
+                        let begin = range.index - context.prefix.length;
+                        let count = formula.length;
+                        console.log("begin: ", begin, " count: ", count , mjx)
+                        quill.deleteText(begin, count)
+                        quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
+                        return false;
+                        // quill.deleteText(range.)
+                        // console.log
+                        // alert("backspace fired")
+                        // let blot = quill.getLeaf(range.index)[0];
+                        // // alert("enter fired")
+                        // console.log(range, context, blot.constructor.blotName)
+                        // if(blot.constructor && blot.constructor.blotName === 'mathbox-inline'){
+                        //     // alert("hey!")
+                        //     window.blot = blot
+                        //     blot.format()
+                        // }else{
+                        //     return true;
+                        // }
+                    }
+                }
+            }
+        }}
+});
+
+quill.insertText(4, String.raw `\vec{F} = m\vec{a}`, {inlinetex: true})
 
 $('#bold-button').click(function() {
     quill.format('bold', true);
