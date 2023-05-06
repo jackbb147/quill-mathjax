@@ -57,6 +57,10 @@ TexBlot.blotName = 'texblot'
 TexBlot.tagName = 'code'
 TexBlot.className = 'texblot'
 
+
+
+
+
 class TweetBlot extends  InlineEmbed {
     static create(latex) {
 
@@ -84,20 +88,25 @@ class TweetBlot extends  InlineEmbed {
         // node.setAttribute('editing', 'false')
 
 
-
-
-        node.addEventListener('mousedown',(e)=>{
-
-            console.log('clicked mathbox.', quill.getSelection())
-            //TODO delete myself and replace with a format
-
+        node.addEventListener('mouseup', (e)=>{
             let begin = quill.getSelection().index - 1;
             let formula = node.getAttribute('latex')
-            node.remove()
+            // debugger;
 
-            quill.insertText(begin, formula, {inlinetex: true})
+            let formulaHTML = MathJax.tex2mml(latex);
             tooltip.show()
+            tooltip.root.innerHTML = formulaHTML;
+            // debugger;
+            let bounds = quill.getBounds(quill.getIndex(getBlot()));
 
+            console.log(bounds)
+            tooltip.root.style["border-radius"] = "5px"
+            tooltip.root.style.padding = "5px"
+            tooltip.root.style.top = `${bounds.bottom}px`;
+            tooltip.root.style.left = `${bounds.left}px`;
+
+            node.remove()
+            quill.insertText(begin, formula, {inlinetex: true})
         })
 
         //
@@ -208,6 +217,12 @@ let quill = new Quill('#editor-container', {
         }}
 });
 
+// Helper function to get the blot at the cursoor position.
+function getBlot(){
+    return quill.getLeaf(quill.getSelection().index)[0]
+}
+
+window.getBlot = getBlot
 
 class MyToolTip extends Tooltip{
     constructor(quill, bounds) {
