@@ -4,6 +4,8 @@ let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
 const Tooltip = Quill.import('ui/tooltip');
 
+window.TT = Tooltip
+
 // let Text = Quill.import('blots/block/text')
 // window.Text = Text
 class BoldBlot extends Inline { }
@@ -226,6 +228,7 @@ class MyToolTip extends Tooltip{
 // https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
 MyToolTip.TEMPLATE = `
 <!--<span>hello</span>-->
+<div class="ql-tooltip-arrow"></div>
 <span>A template: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
 `
 
@@ -233,7 +236,7 @@ MyToolTip.TEMPLATE = `
 
 let tooltip = new MyToolTip(quill);
 
-tooltip.show()
+// tooltip.show()
 window.tooltip = tooltip
 
 
@@ -251,7 +254,10 @@ quill.on("text-change", (delta, oldDelta, source)=>{
         let formula = blot[0].text;
         let typesetted = MathJax.tex2svg(formula);
         console.log(typesetted)
-        tooltip.root.innerHTML = typesetted.outerHTML;
+        tooltip.root.innerHTML = `
+            <span class="ql-tooltip-arrow"></span>
+            ${typesetted.outerHTML}
+        `;
         tooltip.show()
 }})
 $('#bold-button').click(function() {
