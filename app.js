@@ -1,7 +1,8 @@
-let Inline = Quill.import('blots/inline');
+
+
+// let Inline = Quill.import('blots/inline');
 let Block = Quill.import('blots/block');
-let BlockEmbed = Quill.import('blots/block/embed');
-let InlineEmbed = Quill.import('blots/embed')
+
 const Tooltip = Quill.import('ui/tooltip');
 
 window.TT = Tooltip
@@ -63,96 +64,7 @@ TexBlot.className = 'texblot'
 
 
 
-class TweetBlot extends  InlineEmbed {
-    static create(latex) {
-
-        // tooltip.hide()
-        let node = super.create();
-
-
-        node.contentEditable = "false"
-
-
-
-        node.style.display = "inline"
-        // node.style.border = "1px solid red"
-
-
-        node.setAttribute('latex', latex);
-        // var mjx = MathJax.tex2svg(latex);
-        var mjx = MathJax.tex2svg(latex);
-        // node.appendChild(mjx)
-        node.innerHTML = mjx.outerHTML;
-        // debugger;
-        let mathNode = node.firstChild;
-        mathNode.removeAttribute("display")
-        mathNode.style["math-style"] = "normal"
-        // node.setAttribute('editing', 'false')
-
-
-
-        node.addEventListener('mouseup', (e)=>{
-            // debugger;
-            let begin = quill.getIndex(node.__blot.blot)
-            let formula = node.getAttribute('latex')
-            // debugger;
-
-
-            quill.insertText(begin, formula, {inlinetex: true})
-            node.remove()
-            let formulaHTML = MathJax.tex2svg(latex);
-            tooltip.show()
-            tooltip.root.innerHTML = formulaHTML.outerHTML;
-            // debugger;
-            let bounds = quill.getBounds(quill.getIndex(getBlot()));
-
-            console.log(bounds)
-            tooltip.root.style["border-radius"] = "5px"
-            tooltip.root.style.padding = "5px"
-            tooltip.root.style.top = `${bounds.bottom}px`;
-            tooltip.root.style.left = `${bounds.left}px`;
-
-
-
-        })
-
-        //
-        // let mathNode = node.firstChi;
-        // mathNode.removeAttribute("display")
-        // mathNode.style["math-style"] = "normal"
-        window.node = node;
-
-
-        return node;
-    }
-
-
-
-
-
-
-
-    static value(domNode) {
-        return domNode.getAttribute('latex')
-    }
-}
-TweetBlot.blotName = 'mathbox-inline';
-TweetBlot.tagName = 'div';
-TweetBlot.className = 'mathbox-inline';
-
-
-
-
-class InlineTex extends Inline {
-
-}
-
-InlineTex.blotName = 'inlinetex'
-InlineTex.tagName = 'code'
-InlineTex.className = 'inlinetex'
-
-
-
+Quill.register(BlockMath)
 Quill.register(InlineTex)
 Quill.register(BoldBlot);
 Quill.register(ItalicBlot);
@@ -162,6 +74,8 @@ Quill.register(HeaderBlot);
 Quill.register(DividerBlot);
 Quill.register(TweetBlot);
 Quill.register(TexBlot)
+
+
 
 
 let quill = new Quill('#editor-container', {
@@ -210,12 +124,7 @@ let quill = new Quill('#editor-container', {
         }}
 });
 
-// Helper function to get the blot at the cursoor position.
-function getBlot(){
-    return quill.getLeaf(quill.getSelection().index)[0]
-}
 
-window.getBlot = getBlot
 
 class MyToolTip extends Tooltip{
     constructor(quill, bounds) {
@@ -242,7 +151,26 @@ window.tooltip = tooltip
 
 quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
 
+quill.on('selection-change', (range, oldRange, source)=>{
+    let blotOld = getBlot(oldRange.index)
+    let blotNew = getBlot(range.index)
+    // debugger;
+    if(blotOld.parent instanceof InlineTex && !(blotNew.parent instanceof InlineTex)){
+        console.log("you exited inlinetex.", blotOld)
+        // debugger;
+        let formula = blotOld.text;
+        let begin = quill.getIndex(blotOld);
+        let count = formula.length;
 
+    //     TODO: replace with typesetted formula.
+        quill.deleteText(begin, count)
+        quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
+        tooltip.hide()
+
+    }
+    console.log(blotOld, oldRange.index, blotNew, range.index, source)
+
+})
 quill.on("text-change", (delta, oldDelta, source)=>{
     console.log("text changed", delta)
 
