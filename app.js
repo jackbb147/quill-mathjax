@@ -74,6 +74,7 @@ Quill.register(TweetBlot);
 Quill.register(TexBlot)
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
+let enterHandler = new EnterHandlerClass();
 
 let quill = new Quill('#editor-container', {
     theme: "bubble",
@@ -91,20 +92,27 @@ let quill = new Quill('#editor-container', {
                     key: 'enter',
                     format:['code-block'],
                     metaKey: true,
-                    handler: EnterHandler('mathbox-block')
+                    handler: enterHandler.getHandler('mathbox-block')
+                    // handler: EnterHandler('mathbox-block')
                 },
                 enter: {
                     key: 'enter',
                     format:['inlinetex'],
-                    handler: EnterHandler('mathbox-inline')
+                    handler: enterHandler.getHandler('mathbox-inline')
+                    // handler: EnterHandler('mathbox-inline')
                 }
             }
         }
     }
 });
-
 let tooltip = new MyToolTip(quill);
 tooltip.root.classList.add("math-tooltip")
+
+
+enterHandler.setQuillInstance(quill)
+enterHandler.setTooltipInstance(tooltip)
+
+
 
 
 window.tooltip = tooltip

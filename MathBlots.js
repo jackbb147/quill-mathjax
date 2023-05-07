@@ -276,7 +276,7 @@ class MathEditorModule{
 function EnterHandler(   name ) {
     let f = (range, context) => {
         //     TODO
-        // debugger;
+        debugger;
         let formula = context.prefix + context.suffix;
         console.log(formula)
 
@@ -290,6 +290,43 @@ function EnterHandler(   name ) {
     return f
 }
 
+class EnterHandlerClass{
+    constructor() {
+
+    }
+
+    setQuillInstance(quill){
+        this.quill = quill;
+    }
+
+    setTooltipInstance(tooltip){
+        this.tooltip = tooltip;
+    }
+
+    getHandler(name){
+    //
+        let _ = this;
+        let f = (range, context) => {
+            //     TODO
+            // debugger;
+            let quill = _.quill,
+                tooltip = _.tooltip;
+            let formula = context.prefix + context.suffix;
+            console.log(formula)
+
+            let begin = range.index - context.prefix.length;
+            let count = formula.length;
+            quill.deleteText(begin, count)
+            quill.insertEmbed(begin, name, formula, Quill.sources.USER);
+            tooltip.hide()
+        }
+
+        return f;
+    }
+
+
+}
+
 
 // TODO probably need to get rid of these global-namespaced variables...
 
@@ -300,3 +337,4 @@ window.BlockMath = BlockMath
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
 window.EnterHandler = EnterHandler
+window.EnterHandlerClass = EnterHandlerClass
