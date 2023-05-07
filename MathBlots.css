@@ -1,0 +1,9 @@
+
+
+
+.math-tooltip {
+    /*borde*/
+/*    tooltip.root.style["border-radius"] = "5px"*/
+    border-radius: 5px!important;
+    padding: 5px;
+}

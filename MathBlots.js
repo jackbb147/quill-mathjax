@@ -1,8 +1,15 @@
 let Inline = Quill.import('blots/inline');
+// let Inline = Quill.import('blots/inline');
+let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
+let Container = Quill.import("blots/container")
+let TextBlot = Quill.import("blots/text")
+let Break = Quill.import('blots/break')
 
 
+
+window.Block = Block;
 // Helper function to get the blot at the cursoor position.
 function getBlot(index){
     if(index === undefined) index = quill.getSelection().index;
@@ -13,10 +20,65 @@ window.getBlot = getBlot
 // TODO
 class BlockMath extends BlockEmbed {
     static create(latex) {
+    //TODO
+        let node = super.create()
+        node.contentEditable = "false"
+        node.setAttribute('latex', latex);
 
+        var mjx = MathJax.tex2svg(latex);
+        node.innerHTML = mjx.outerHTML;
+
+        window.node = node;
+
+        node.addEventListener('mouseup', (e)=>{
+            // debugger;
+            let begin = quill.getIndex(node.__blot.blot)
+            let formula = node.getAttribute('latex')
+            // debugger;
+
+
+            quill.insertText(begin, formula, {'code-block': true})
+            // debugger;
+            node.remove()
+
+            let formulaHTML = MathJax.tex2svg(latex);
+            tooltip.show()
+
+            tooltip.root.innerHTML = `
+            <span class="ql-tooltip-arrow"></span>
+            ${formulaHTML.outerHTML}
+        `;
+            // // debugger;
+            // let bounds = quill.getBounds(quill.getIndex(getBlot()));
+            //
+            // console.log(bounds)
+            //
+            //
+            // tooltip.root.style.top = `${bounds.bottom}px`;
+            // tooltip.root.style.left = `${bounds.left}px`;
+
+
+
+        })
+
+        return node;
     }
+
+    static value(domNode){
+    //     TODO
+    }
+
+
 }
 
+BlockMath.tagName = 'div'
+BlockMath.className = 'mathbox-block'
+BlockMath.blotName = 'mathbox-block'
+    /**
+     * TweetBlot.blotName = 'mathbox-inline';
+     * TweetBlot.tagName = 'div';
+     * TweetBlot.className = 'mathbox-inline';
+     */
 
 
 
@@ -67,8 +129,8 @@ class TweetBlot extends  InlineEmbed {
             let bounds = quill.getBounds(quill.getIndex(getBlot()));
 
             console.log(bounds)
-            tooltip.root.style["border-radius"] = "5px"
-            tooltip.root.style.padding = "5px"
+
+
             tooltip.root.style.top = `${bounds.bottom}px`;
             tooltip.root.style.left = `${bounds.left}px`;
 
@@ -111,7 +173,21 @@ InlineTex.blotName = 'inlinetex'
 InlineTex.tagName = 'code'
 InlineTex.className = 'inlinetex'
 
+class BlockTex extends Block {
 
+}
+
+
+
+BlockTex.blotName = 'blocktex'
+BlockTex.tagName = 'pre'
+BlockTex.className = 'blocktex'
+
+
+
+// window.PreviewBlock = PreviewBlock
 window.TweetBlot = TweetBlot
 window.InlineTex = InlineTex
+window.BlockTex = BlockTex
 window.BlockMath = BlockMath
+
