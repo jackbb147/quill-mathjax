@@ -75,30 +75,6 @@ Quill.register(TexBlot)
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
 
-
-
-/**
- *
- * @param name
- * @returns {f}
- * @constructor
- */
-function EnterHandler( name ){
-    let f = ( range, context )=>{
-    //     TODO
-        let formula = context.prefix + context.suffix;
-        console.log(formula)
-
-        let begin = range.index - context.prefix.length;
-        let count = formula.length;
-        quill.deleteText(begin, count)
-        quill.insertEmbed(begin, name, formula, Quill.sources.USER);
-        tooltip.hide()
-    }
-
-    return f;
-}
-
 let quill = new Quill('#editor-container', {
     theme: "bubble",
     modules:{
@@ -108,7 +84,8 @@ let quill = new Quill('#editor-container', {
             ['bold', 'italic', 'underline'],
             ['image', 'code-block']
         ],
-        keyboard: {
+        keyboard:
+            {
             bindings:{
                 cmd_enter:{
                     key: 'enter',
@@ -122,19 +99,17 @@ let quill = new Quill('#editor-container', {
                     handler: EnterHandler('mathbox-inline')
                 }
             }
-        }}
+        }
+    }
 });
-
-
 
 let tooltip = new MyToolTip(quill);
 tooltip.root.classList.add("math-tooltip")
 
 
 window.tooltip = tooltip
+window.quill = quill;
 
-
-quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
 
 
 

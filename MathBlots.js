@@ -221,8 +221,8 @@ class MathEditorModule{
                     // debugger;
                     console.log(bounds)
                     formula = String.raw `
-                \displaylines{ ${formula} }
-            `
+                        \displaylines{ ${formula} }
+                    `
 
                     console.log(formula)
 
@@ -252,7 +252,14 @@ class MathEditorModule{
             }
         })
 
+
+        // quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
+
+
     }
+
+
+
 }
 
 
@@ -260,14 +267,36 @@ class MathEditorModule{
 
 
 
+/**
+ *
+ * @param name
+ * @returns {f}
+ * @constructor
+ */
+function EnterHandler(   name ) {
+    let f = (range, context) => {
+        //     TODO
+        // debugger;
+        let formula = context.prefix + context.suffix;
+        console.log(formula)
 
+        let begin = range.index - context.prefix.length;
+        let count = formula.length;
+        quill.deleteText(begin, count)
+        quill.insertEmbed(begin, name, formula, Quill.sources.USER);
+        tooltip.hide()
+    }
+
+    return f
+}
 
 
 // TODO probably need to get rid of these global-namespaced variables...
+
 window.TweetBlot = TweetBlot
 window.InlineTex = InlineTex
 window.BlockTex = BlockTex
 window.BlockMath = BlockMath
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-
+window.EnterHandler = EnterHandler
