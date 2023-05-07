@@ -214,7 +214,8 @@ quill.on("text-change", (delta, oldDelta, source)=>{
         tooltip.show()
 
         if(!isInline){
-            tooltip.root.style.width = "100%"
+            // tooltip.root.style.width = "100%"
+            tooltip.root.classList.add('fullwidth')
 
             // let bounds = quill.getBounds(quill.getSelection().index);
             let blot = getBlot();
@@ -231,8 +232,20 @@ quill.on("text-change", (delta, oldDelta, source)=>{
 
 
             tooltip.root.style.top = `${bounds.bottom}px`;
+            tooltip.root.style.left = `0px`;
 
             // tooltip.root.style.left = `${bounds.left}px`;
+        }else{
+                if(tooltip.root.classList.contains('fullwidth')){
+                    tooltip.root.classList.remove('fullwidth')
+                }
+                let bounds = quill.getBounds(quill.getIndex(getBlot()));
+
+                console.log(bounds)
+
+
+                tooltip.root.style.top = `${bounds.bottom}px`;
+                tooltip.root.style.left = `${bounds.left}px`;
         }
 
         let typesetted = MathJax.tex2svg(formula);

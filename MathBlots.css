@@ -7,3 +7,7 @@
     border-radius: 5px!important;
     padding: 5px;
 }
+
+.fullwidth {
+    width: 100%;
+}

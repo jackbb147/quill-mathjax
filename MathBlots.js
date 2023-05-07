@@ -3,9 +3,8 @@ let Inline = Quill.import('blots/inline');
 let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
-let Container = Quill.import("blots/container")
-let TextBlot = Quill.import("blots/text")
-let Break = Quill.import('blots/break')
+
+
 
 
 
@@ -17,6 +16,35 @@ function getBlot(index){
 }
 
 window.getBlot = getBlot
+
+/**
+ *
+ * @param node
+ * @param attr {'code-block': true} or {'inlinetex': true}
+ * @returns {(function(*): void)|*}
+ * @constructor
+ */
+function MathNodeMouseUpHandler(node, attr){
+    return (e)=>{
+        let begin = quill.getIndex(node.__blot.blot)
+        let formula = node.getAttribute('latex')
+        // debugger;
+
+
+        quill.insertText(begin, formula, attr)
+        // debugger;
+        node.remove()
+
+        let formulaHTML = MathJax.tex2svg(formula);
+        tooltip.show()
+
+        tooltip.root.innerHTML = `
+            <span class="ql-tooltip-arrow"></span>
+            ${formulaHTML.outerHTML}
+        `;
+
+    }
+}
 // TODO
 class BlockMath extends BlockEmbed {
     static create(latex) {
@@ -27,45 +55,16 @@ class BlockMath extends BlockEmbed {
 
         var mjx = MathJax.tex2svg(latex);
         node.innerHTML = mjx.outerHTML;
-
         window.node = node;
-
-        node.addEventListener('mouseup', (e)=>{
-            // debugger;
-            let begin = quill.getIndex(node.__blot.blot)
-            let formula = node.getAttribute('latex')
-            // debugger;
-
-
-            quill.insertText(begin, formula, {'code-block': true})
-            // debugger;
-            node.remove()
-
-            let formulaHTML = MathJax.tex2svg(latex);
-            tooltip.show()
-
-            tooltip.root.innerHTML = `
-            <span class="ql-tooltip-arrow"></span>
-            ${formulaHTML.outerHTML}
-        `;
-            // // debugger;
-            // let bounds = quill.getBounds(quill.getIndex(getBlot()));
-            //
-            // console.log(bounds)
-            //
-            //
-            // tooltip.root.style.top = `${bounds.bottom}px`;
-            // tooltip.root.style.left = `${bounds.left}px`;
-
-
-
-        })
-
+        node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
+            'code-block': true
+        }))
         return node;
     }
 
     static value(domNode){
     //     TODO
+        return domNode.getAttribute('latex')
     }
 
 
@@ -74,13 +73,6 @@ class BlockMath extends BlockEmbed {
 BlockMath.tagName = 'div'
 BlockMath.className = 'mathbox-block'
 BlockMath.blotName = 'mathbox-block'
-    /**
-     * TweetBlot.blotName = 'mathbox-inline';
-     * TweetBlot.tagName = 'div';
-     * TweetBlot.className = 'mathbox-inline';
-     */
-
-
 
 
 
@@ -90,53 +82,49 @@ class TweetBlot extends  InlineEmbed {
 
         // tooltip.hide()
         let node = super.create();
-
-
         node.contentEditable = "false"
-
-
-
         node.style.display = "inline"
-        // node.style.border = "1px solid red"
-
 
         node.setAttribute('latex', latex);
-        // var mjx = MathJax.tex2svg(latex);
+
         var mjx = MathJax.tex2svg(latex);
-        // node.appendChild(mjx)
+
         node.innerHTML = mjx.outerHTML;
-        // debugger;
+
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
-        // node.setAttribute('editing', 'false')
 
 
-
-        node.addEventListener('mouseup', (e)=>{
-            // debugger;
-            let begin = quill.getIndex(node.__blot.blot)
-            let formula = node.getAttribute('latex')
-            // debugger;
-
-
-            quill.insertText(begin, formula, {inlinetex: true})
-            node.remove()
-            let formulaHTML = MathJax.tex2svg(latex);
-            tooltip.show()
-            tooltip.root.innerHTML = formulaHTML.outerHTML;
-            // debugger;
-            let bounds = quill.getBounds(quill.getIndex(getBlot()));
-
-            console.log(bounds)
-
-
-            tooltip.root.style.top = `${bounds.bottom}px`;
-            tooltip.root.style.left = `${bounds.left}px`;
-
-
-
-        })
+        node.addEventListener('mouseup',
+            MathNodeMouseUpHandler(node, {
+                'inlinetex': true
+            })
+        //     (e)=>{
+        //     // debugger;
+        //     let begin = quill.getIndex(node.__blot.blot)
+        //     let formula = node.getAttribute('latex')
+        //     // debugger;
+        //
+        //
+        //     quill.insertText(begin, formula, {inlinetex: true})
+        //     node.remove()
+        //     let formulaHTML = MathJax.tex2svg(latex);
+        //     tooltip.show()
+        //     tooltip.root.innerHTML = formulaHTML.outerHTML;
+        //     // debugger;
+        //     let bounds = quill.getBounds(quill.getIndex(getBlot()));
+        //
+        //     console.log(bounds)
+        //
+        //
+        //     tooltip.root.style.top = `${bounds.bottom}px`;
+        //     tooltip.root.style.left = `${bounds.left}px`;
+        //
+        //
+        //
+        // }
+        )
 
         //
         // let mathNode = node.firstChi;
