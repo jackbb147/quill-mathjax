@@ -3,11 +3,13 @@ let Inline = Quill.import('blots/inline');
 let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
+let SyntaxCodeBlock = Quill.import('modules/syntax')
+
+console.log(SyntaxCodeBlock)
 
 
 
-
-
+window.SyntaxCodeBlock = SyntaxCodeBlock
 window.Block = Block;
 // Helper function to get the blot at the cursoor position.
 function getBlot(index){

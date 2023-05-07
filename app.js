@@ -175,20 +175,30 @@ quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlin
 // TODO lots of refactoring needed..
 quill.on('selection-change', (range, oldRange, source)=>{
     // debugger;
+
     if(source !== 'user' || !range || !oldRange) return;
     let blotOld = getBlot(oldRange.index)
     let blotNew = getBlot(range.index)
     // debugger;
-    if(blotOld.parent instanceof InlineTex && !(blotNew.parent instanceof InlineTex)){
-        console.log("you exited inlinetex.", blotOld)
+    let isBlockTex = (blot)=>{
+        return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
+    }
+
+    let isInlineTex = blot => {
+        return blot.parent instanceof InlineTex
+    }
+    if( (isBlockTex(blotOld) && !isBlockTex(blotNew) )||
+        (isInlineTex(blotOld) && !isInlineTex(blotNew))){
+        console.log("you exited inline or block tex.", blotOld)
         // debugger;
         let formula = blotOld.text;
         let begin = quill.getIndex(blotOld);
         let count = formula.length;
 
+        let wasInline = blotOld.parent instanceof BlockTex
 
         quill.deleteText(begin, count)
-        quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
+        quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
         tooltip.hide()
 
     }
