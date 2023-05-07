@@ -39,18 +39,6 @@ class DividerBlot extends BlockEmbed { }
 DividerBlot.blotName = 'divider';
 DividerBlot.tagName = 'hr';
 
-class TexBlot extends InlineEmbed {
-
-}
-
-/**
- * TweetBlot.blotName = 'mathbox-inline';
- * TweetBlot.tagName = 'div';
- * TweetBlot.className = 'mathbox-inline'; */
-TexBlot.blotName = 'texblot'
-TexBlot.tagName = 'code'
-TexBlot.className = 'texblot'
-
 
 class BlockquoteBlot extends Block { }
 BlockquoteBlot.blotName = 'blockquote';
@@ -71,7 +59,7 @@ Quill.register(BlockquoteBlot);
 Quill.register(HeaderBlot);
 Quill.register(DividerBlot);
 Quill.register(TweetBlot);
-Quill.register(TexBlot)
+
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
 let enterHandler = new EnterHandlerClass();

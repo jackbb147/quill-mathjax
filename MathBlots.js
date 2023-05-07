@@ -274,32 +274,6 @@ class MathEditorModule{
 
 
 
-
-
-
-/**
- *
- * @param name
- * @returns {f}
- * @constructor
- */
-function EnterHandler(   name ) {
-    let f = (range, context) => {
-        //     TODO
-        debugger;
-        let formula = context.prefix + context.suffix;
-        console.log(formula)
-
-        let begin = range.index - context.prefix.length;
-        let count = formula.length;
-        quill.deleteText(begin, count)
-        quill.insertEmbed(begin, name, formula, Quill.sources.USER);
-        tooltip.hide()
-    }
-
-    return f
-}
-
 class EnterHandlerClass{
     constructor() {
 
@@ -365,5 +339,31 @@ window.BlockTex = BlockTex
 window.BlockMath = BlockMath
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-window.EnterHandler = EnterHandler
+// window.EnterHandler = EnterHandler
+
+
+/**
+ * How to use:
+ *
+ * Quill.register(Block)
+ * Quill.register(BlockMath)
+ * Quill.register(BlockTex)
+ * Quill.register(InlineTex)
+ * Quill.register(TweetBlot);
+ * Quill.register('modules/MathEditorModule', MathEditorModule)
+ * let enterHandler = new EnterHandlerClass();
+ * let quill = new Quill('#editor-container', {
+ *     theme: "bubble",
+ *     modules:{
+ *         MathEditorModule: {
+ *             enterHandler
+ *         },
+ *         keyboard:
+ *             {
+ *             bindings: enterHandler.getBindings()
+ *         }
+ *     }
+ * });
+ * @type {EnterHandlerClass}
+ */
 window.EnterHandlerClass = EnterHandlerClass
