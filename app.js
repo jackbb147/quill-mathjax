@@ -189,13 +189,14 @@ quill.on('selection-change', (range, oldRange, source)=>{
     }
     if( (isBlockTex(blotOld) && !isBlockTex(blotNew) )||
         (isInlineTex(blotOld) && !isInlineTex(blotNew))){
+        let wasInline = isInlineTex(blotOld)
         console.log("you exited inline or block tex.", blotOld)
         // debugger;
         let formula = blotOld.text;
         let begin = quill.getIndex(blotOld);
         let count = formula.length;
 
-        let wasInline = blotOld.parent instanceof BlockTex
+
 
         quill.deleteText(begin, count)
         quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
