@@ -48,6 +48,7 @@ function MathNodeMouseUpHandler(node, attr){
 }
 
 
+// https://stackoverflow.com/a/62778691
 let TexEditorBlot = Base => class extends Base {
     static create(latex, isInline = false){
         let node = super.create()
@@ -74,12 +75,7 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
     static create(latex) {
     //TODO
         let node = super.create(latex)
-        node.contentEditable = "false"
-        node.setAttribute('latex', latex);
 
-        var mjx = MathJax.tex2svg(latex);
-        node.innerHTML = mjx.outerHTML;
-        window.node = node;
         node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
             'code-block': true
         }))
@@ -98,14 +94,10 @@ BlockMath.blotName = 'mathbox-block'
 class TweetBlot extends  TexEditorBlot(InlineEmbed){ // supposed to be inline ..., not blockEmbed...
     static create(latex) {
 
-        // debugger;
-        // tooltip.hide()
         let node = super.create(latex, true);
-        node.style.display = "inline"
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
-
         node.addEventListener('mouseup',
             MathNodeMouseUpHandler(node, {
                 'inlinetex': true
@@ -116,10 +108,6 @@ class TweetBlot extends  TexEditorBlot(InlineEmbed){ // supposed to be inline ..
         return node;
     }
 
-
-    // static value(domNode) {
-    //     return domNode.getAttribute('latex')
-    // }
 }
 TweetBlot.blotName = 'mathbox-inline';
 TweetBlot.tagName = 'div';
