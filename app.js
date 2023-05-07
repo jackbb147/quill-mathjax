@@ -124,19 +124,7 @@ let quill = new Quill('#editor-container', {
                         quill.deleteText(begin, count)
                         quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
                         return false;
-                        // quill.deleteText(range.)
-                        // console.log
-                        // alert("backspace fired")
-                        // let blot = quill.getLeaf(range.index)[0];
-                        // // alert("enter fired")
-                        // console.log(range, context, blot.constructor.blotName)
-                        // if(blot.constructor && blot.constructor.blotName === 'mathbox-inline'){
-                        //     // alert("hey!")
-                        //     window.blot = blot
-                        //     blot.format()
-                        // }else{
-                        //     return true;
-                        // }
+
                     }
                 }
             }
