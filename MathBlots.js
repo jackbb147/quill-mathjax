@@ -154,10 +154,14 @@ MyToolTip.TEMPLATE = `
 
 class MathEditorModule{
     constructor(quill, options) {
+
+        if(!options.hasOwnProperty('enterHandler')){
+            throw new Error('No enterHandler supplied. ')
+        }
         this.quill = quill;
         this.options = options;
 
-        // TODO lots of refactoring needed..
+        // TODO some refactoring needed..
         quill.on('selection-change', (range, oldRange, source)=>{
             // debugger;
 
@@ -252,13 +256,19 @@ class MathEditorModule{
             }
         })
 
+        let tooltip = new MyToolTip(quill);
+        tooltip.root.classList.add("math-tooltip")
 
-        // quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
 
+        window.tooltip = tooltip
+        window.quill = quill;
+
+
+        let enterHandler = options.enterHandler;
+        enterHandler.setQuillInstance(quill)
+        enterHandler.setTooltipInstance(tooltip)
 
     }
-
-
 
 }
 
@@ -322,6 +332,25 @@ class EnterHandlerClass{
         }
 
         return f;
+    }
+
+    getBindings(){
+        let _ = this;
+
+        return {
+            cmd_enter: {
+                key: 'enter',
+                format: ['code-block'],
+                metaKey: true,
+                handler: _.getHandler('mathbox-block')
+            },
+            enter: {
+                key: 'enter',
+                format: ['inlinetex'],
+                metaKey: null,
+                handler: _.getHandler('mathbox-inline')
+            }
+        };
     }
 
 

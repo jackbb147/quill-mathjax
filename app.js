@@ -79,7 +79,9 @@ let enterHandler = new EnterHandlerClass();
 let quill = new Quill('#editor-container', {
     theme: "bubble",
     modules:{
-        MathEditorModule: true,
+        MathEditorModule: {
+            enterHandler
+        },
         toolbar: [
             [{ header: [1, 2, false] }],
             ['bold', 'italic', 'underline'],
@@ -87,36 +89,10 @@ let quill = new Quill('#editor-container', {
         ],
         keyboard:
             {
-            bindings:{
-                cmd_enter:{
-                    key: 'enter',
-                    format:['code-block'],
-                    metaKey: true,
-                    handler: enterHandler.getHandler('mathbox-block')
-                    // handler: EnterHandler('mathbox-block')
-                },
-                enter: {
-                    key: 'enter',
-                    format:['inlinetex'],
-                    handler: enterHandler.getHandler('mathbox-inline')
-                    // handler: EnterHandler('mathbox-inline')
-                }
-            }
+            bindings: enterHandler.getBindings()
         }
     }
 });
-let tooltip = new MyToolTip(quill);
-tooltip.root.classList.add("math-tooltip")
-
-
-enterHandler.setQuillInstance(quill)
-enterHandler.setTooltipInstance(tooltip)
-
-
-
-
-window.tooltip = tooltip
-window.quill = quill;
 
 
 
