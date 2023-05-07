@@ -1,11 +1,5 @@
 
 
-
-
-const Tooltip = Quill.import('ui/tooltip');
-
-window.TT = Tooltip
-
 // let Text = Quill.import('blots/block/text')
 // window.Text = Text
 class BoldBlot extends Inline { }
@@ -78,6 +72,9 @@ Quill.register(HeaderBlot);
 Quill.register(DividerBlot);
 Quill.register(TweetBlot);
 Quill.register(TexBlot)
+Quill.register('modules/MathEditorModule', MathEditorModule)
+
+
 
 
 /**
@@ -105,6 +102,7 @@ function EnterHandler( name ){
 let quill = new Quill('#editor-container', {
     theme: "bubble",
     modules:{
+        MathEditorModule: true,
         toolbar: [
             [{ header: [1, 2, false] }],
             ['bold', 'italic', 'underline'],
@@ -129,127 +127,26 @@ let quill = new Quill('#editor-container', {
 
 
 
-class MyToolTip extends Tooltip{
-    constructor(quill, bounds) {
-        super(quill, bounds);
-    }
-}
-
-
-// This is the innerHTML of the tooltip.
-// https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
-MyToolTip.TEMPLATE = `
-<!--<span>hello</span>-->
-<div class="ql-tooltip-arrow"></div>
-<span>A template: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
-`
-
-
-
 let tooltip = new MyToolTip(quill);
 tooltip.root.classList.add("math-tooltip")
 
-// tooltip.show()
+
 window.tooltip = tooltip
 
 
 quill.insertText(4, String.raw `\int_0^1 \vec{F}(\vec{r})\cdot d\vec{r}`, {inlinetex: true})
 
 
-// TODO lots of refactoring needed..
-quill.on('selection-change', (range, oldRange, source)=>{
-    // debugger;
-
-    if(source !== 'user' || !range || !oldRange) return;
-    let blotOld = getBlot(oldRange.index)
-    let blotNew = getBlot(range.index)
-    // debugger;
-    let isBlockTex = (blot)=>{
-        return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
-    }
-
-    let isInlineTex = blot => {
-        return blot.parent instanceof InlineTex
-    }
-    if( (isBlockTex(blotOld) && !isBlockTex(blotNew) )||
-        (isInlineTex(blotOld) && !isInlineTex(blotNew))){
-        let wasInline = isInlineTex(blotOld)
-        console.log("you exited inline or block tex.", blotOld)
-        // debugger;
-        let formula = blotOld.text;
-        let begin = quill.getIndex(blotOld);
-        let count = formula.length;
 
 
 
-        quill.deleteText(begin, count)
-        quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
-        tooltip.hide()
-
-    }
-    console.log(blotOld, oldRange.index, blotNew, range.index, source)
-
-})
-quill.on("text-change", (delta, oldDelta, source)=>{
-    console.log("text changed", delta)
-
-    if(!quill.getSelection()) return;
-
-    let blotName = quill.getLeaf(quill.getSelection().index)[0].parent.constructor.blotName
-    console.log(blotName)
-    if(blotName === 'inlinetex' || blotName === 'code-block'){
-        let isInline = blotName==='inlinetex'
-        // debugger;
-        let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-        let blot = quill.getLeaf(begin)
 
 
-        let formula = blot[0].text;
-
-        tooltip.show()
-
-        if(!isInline){
-            // tooltip.root.style.width = "100%"
-            tooltip.root.classList.add('fullwidth')
-
-            // let bounds = quill.getBounds(quill.getSelection().index);
-            let blot = getBlot();
-            let bounds = quill.getBounds(
-                blot.text.length + quill.getIndex(blot)
-            );
-            // debugger;
-            console.log(bounds)
-            formula = String.raw `
-                \displaylines{ ${formula} }
-            `
-
-            console.log(formula)
 
 
-            tooltip.root.style.top = `${bounds.bottom}px`;
-            tooltip.root.style.left = `0px`;
-
-            // tooltip.root.style.left = `${bounds.left}px`;
-        }else{
-                if(tooltip.root.classList.contains('fullwidth')){
-                    tooltip.root.classList.remove('fullwidth')
-                }
-                let bounds = quill.getBounds(quill.getIndex(getBlot()));
-
-                console.log(bounds)
 
 
-                tooltip.root.style.top = `${bounds.bottom}px`;
-                tooltip.root.style.left = `${bounds.left}px`;
-        }
 
-        let typesetted = MathJax.tex2svg(formula);
-        tooltip.root.innerHTML = `
-            <span class="ql-tooltip-arrow"></span>
-            ${typesetted.outerHTML}
-        `;
-    }
-})
 $('#bold-button').click(function() {
     quill.format('bold', true);
 });
