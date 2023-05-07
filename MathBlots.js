@@ -81,7 +81,6 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
         }))
         return node;
     }
-
 }
 
 BlockMath.tagName = 'div'

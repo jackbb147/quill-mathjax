@@ -80,7 +80,27 @@ Quill.register(TweetBlot);
 Quill.register(TexBlot)
 
 
+/**
+ *
+ * @param name
+ * @returns {f}
+ * @constructor
+ */
+function EnterHandler( name ){
+    let f = ( range, context )=>{
+    //     TODO
+        let formula = context.prefix + context.suffix;
+        console.log(formula)
 
+        let begin = range.index - context.prefix.length;
+        let count = formula.length;
+        quill.deleteText(begin, count)
+        quill.insertEmbed(begin, name, formula, Quill.sources.USER);
+        tooltip.hide()
+    }
+
+    return f;
+}
 
 let quill = new Quill('#editor-container', {
     theme: "bubble",
@@ -96,36 +116,12 @@ let quill = new Quill('#editor-container', {
                     key: 'enter',
                     format:['code-block'],
                     metaKey: true,
-                    handler: (range, context)=>{
-                        // alert("hey!")
-                    //     TODO refactor this... can combine the two handler functions somehow
-                        let formula = context.prefix + context.suffix;
-                        console.log(formula)
-
-                        let begin = range.index - context.prefix.length;
-                        let count = formula.length;
-                        quill.deleteText(begin, count)
-                        quill.insertEmbed(begin, 'mathbox-block', formula, Quill.sources.USER);
-                        tooltip.hide()
-                    }
+                    handler: EnterHandler('mathbox-block')
                 },
                 enter: {
                     key: 'enter',
                     format:['inlinetex'],
-                    handler: function(range, context) {
-                        // alert("enter fired!")
-                        let formula = context.prefix + context.suffix;
-                        console.log("enter fired in inlinetex",range, context, formula, formula.length)
-                        // var mjx = MathJax.tex2svg(formula);
-                        tooltip.hide()
-                        let begin = range.index - context.prefix.length;
-                        let count = formula.length;
-                        // console.log("begin: ", begin, " count: ", count , mjx)
-                        quill.deleteText(begin, count)
-                        quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
-                        return false;
-
-                    }
+                    handler: EnterHandler('mathbox-inline')
                 }
             }
         }}
