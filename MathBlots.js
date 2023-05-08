@@ -36,8 +36,8 @@ window.Block = Block;
 
 // TODO refactor this somewhere else....
 // Helper function to get the blot at the cursoor position.
-function getBlot(index){
-    if(index === undefined) index = quill.getSelection().index;
+function getBlot(index) {
+    if (index === undefined) index = quill.getSelection().index;
     return quill.getLeaf(index)[0]
 }
 
@@ -50,8 +50,8 @@ window.getBlot = getBlot
  * @returns {(function(*): void)|*}
  * @constructor
  */
-function MathNodeMouseUpHandler(node, attr){
-    return (e)=>{
+function MathNodeMouseUpHandler(node, attr) {
+    return (e) => {
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
         // debugger;
@@ -74,7 +74,7 @@ function MathNodeMouseUpHandler(node, attr){
 
 // https://stackoverflow.com/a/62778691
 let TexEditorBlot = Base => class extends Base {
-    static create(latex, isInline = false){
+    static create(latex, isInline = false) {
         let node = super.create()
         node.contentEditable = "false"
         node.setAttribute('latex', latex);
@@ -82,12 +82,12 @@ let TexEditorBlot = Base => class extends Base {
         var mjx = MathJax.tex2svg(latex);
         node.innerHTML = mjx.outerHTML;
         window.node = node;
-        if(isInline) node.style.display = "inline"
+        if (isInline) node.style.display = "inline"
 
         return node;
     }
 
-    static value(domNode){
+    static value(domNode) {
         //     TODO
 
         return domNode.getAttribute('latex')
@@ -97,7 +97,7 @@ let TexEditorBlot = Base => class extends Base {
 // TODO
 class BlockMath extends TexEditorBlot(BlockEmbed) {
     static create(latex) {
-    //TODO
+        //TODO
         let node = super.create(latex)
 
         node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
@@ -112,9 +112,8 @@ BlockMath.className = 'mathbox-block'
 BlockMath.blotName = 'mathbox-block'
 
 
-
 // TODO change the name of this ...
-class TweetBlot extends  TexEditorBlot(InlineEmbed){ // supposed to be inline ..., not blockEmbed...
+class TweetBlot extends TexEditorBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
     static create(latex) {
 
         let node = super.create(latex, true);
@@ -125,18 +124,16 @@ class TweetBlot extends  TexEditorBlot(InlineEmbed){ // supposed to be inline ..
             MathNodeMouseUpHandler(node, {
                 'inlinetex': true
             })
-
         )
 
         return node;
     }
 
 }
+
 TweetBlot.blotName = 'mathbox-inline';
 TweetBlot.tagName = 'div';
 TweetBlot.className = 'mathbox-inline';
-
-
 
 
 class InlineTex extends Inline {
@@ -157,9 +154,7 @@ BlockTex.tagName = 'pre'
 BlockTex.className = 'blocktex'
 
 
-
-
-class MyToolTip extends Tooltip{
+class MyToolTip extends Tooltip {
     constructor(quill, bounds) {
         super(quill, bounds);
     }
@@ -175,111 +170,18 @@ MyToolTip.TEMPLATE = `
 `
 
 
-class MathEditorModule{
+class MathEditorModule {
     constructor(quill, options) {
 
-        if(!options.hasOwnProperty('enterHandler')){
+        if (!options.hasOwnProperty('enterHandler')) {
             throw new Error('No enterHandler supplied. ')
         }
         this.quill = quill;
         this.options = options;
 
         // TODO some refactoring needed..
-        quill.on('selection-change', (range, oldRange, source)=>{
-            // debugger;
-
-            if(source !== 'user' || !range || !oldRange) return;
-            let blotOld = getBlot(oldRange.index)
-            let blotNew = getBlot(range.index)
-            // debugger;
-            let isBlockTex = (blot)=>{
-                return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
-            }
-
-            let isInlineTex = blot => {
-                return blot.parent instanceof InlineTex
-            }
-            if( (isBlockTex(blotOld) && !isBlockTex(blotNew) )||
-                (isInlineTex(blotOld) && !isInlineTex(blotNew))){
-                let wasInline = isInlineTex(blotOld)
-                console.log("you exited inline or block tex.", blotOld)
-                // debugger;
-                let formula = blotOld.text;
-                let begin = quill.getIndex(blotOld);
-                let count = formula.length;
-
-
-
-                quill.deleteText(begin, count)
-                quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
-                tooltip.hide()
-
-            }
-            // console.log(blotOld, oldRange.index, blotNew, range.index, source)
-
-        })
-        quill.on("text-change", (delta, oldDelta, source)=>{
-            console.log("text changed", delta)
-
-            if(!quill.getSelection()) return;
-
-            let blot = quill.getLeaf(quill.getSelection().index)[0]
-            // debugger;
-            let blotName = blot.parent.constructor.blotName
-            console.log(blotName)
-            if(blotName === 'inlinetex' || blotName === 'code-block'){
-                let isInline = blotName==='inlinetex'
-                // debugger;
-                let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-                // let blot = quill.getLeaf(begin)
-
-
-                let formula = blot.text;
-                // debugger;
-                tooltip.show()
-
-                if(!isInline){
-                    // tooltip.root.style.width = "100%"
-                    tooltip.root.classList.add('fullwidth')
-
-                    // let bounds = quill.getBounds(quill.getSelection().index);
-                    let blot = getBlot();
-                    let bounds = quill.getBounds(
-                        blot.text.length + quill.getIndex(blot)
-                    );
-                    // debugger;
-                    console.log(bounds)
-                    formula = String.raw `
-                        \displaylines{ ${formula} }
-                    `
-
-                    console.log(formula)
-
-
-                    tooltip.root.style.top = `${bounds.bottom}px`;
-                    tooltip.root.style.left = `0px`;
-
-                    // tooltip.root.style.left = `${bounds.left}px`;
-                }else{
-                    if(tooltip.root.classList.contains('fullwidth')){
-                        tooltip.root.classList.remove('fullwidth')
-                    }
-                    let bounds = quill.getBounds(quill.getIndex(getBlot()));
-
-                    console.log(bounds)
-
-
-                    tooltip.root.style.top = `${bounds.bottom}px`;
-                    tooltip.root.style.left = `${bounds.left}px`;
-                }
-
-                let typesetted = MathJax.tex2svg(formula);
-                tooltip.root.innerHTML = `
-            <span class="ql-tooltip-arrow"></span>
-            ${typesetted.outerHTML}
-        `;
-            }
-        })
+        quill.on('selection-change', this.handleSelectionChange.bind(this))
+        quill.on("text-change", this.handleTextChange.bind(this))
 
         let tooltip = new MyToolTip(quill);
         tooltip.root.classList.add("math-tooltip")
@@ -295,25 +197,121 @@ class MathEditorModule{
 
     }
 
+
+    handleTextChange(delta, oldDelta, source) {
+        console.log("text changed", delta, this)
+
+        let quill = this.quill;
+        if (!quill.getSelection()) return;
+
+        let blot = quill.getLeaf(quill.getSelection().index)[0]
+        // debugger;
+        let blotName = blot.parent.constructor.blotName
+        console.log(blotName)
+        if (blotName === 'inlinetex' || blotName === 'code-block') {
+            let isInline = blotName === 'inlinetex'
+            // debugger;
+            let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
+            // let blot = quill.getLeaf(begin)
+
+
+            let formula = blot.text;
+            // debugger;
+            tooltip.show()
+
+            if (!isInline) {
+                // tooltip.root.style.width = "100%"
+                tooltip.root.classList.add('fullwidth')
+
+                // let bounds = quill.getBounds(quill.getSelection().index);
+                let blot = getBlot();
+                let bounds = quill.getBounds(
+                    blot.text.length + quill.getIndex(blot)
+                );
+                // debugger;
+                console.log(bounds)
+                formula = String.raw`
+                        \displaylines{ ${formula} }
+                    `
+
+                console.log(formula)
+
+
+                tooltip.root.style.top = `${bounds.bottom}px`;
+                tooltip.root.style.left = `0px`;
+
+                // tooltip.root.style.left = `${bounds.left}px`;
+            } else {
+                if (tooltip.root.classList.contains('fullwidth')) {
+                    tooltip.root.classList.remove('fullwidth')
+                }
+                let bounds = quill.getBounds(quill.getIndex(getBlot()));
+
+                console.log(bounds)
+
+
+                tooltip.root.style.top = `${bounds.bottom}px`;
+                tooltip.root.style.left = `${bounds.left}px`;
+            }
+
+            let typesetted = MathJax.tex2svg(formula);
+            tooltip.root.innerHTML = `
+                    <span class="ql-tooltip-arrow"></span>
+                    ${typesetted.outerHTML}
+                `;
+        }
+    }
+
+    handleSelectionChange(range, oldRange, source) {
+        // debugger;
+
+        if (source !== 'user' || !range || !oldRange) return;
+        let blotOld = getBlot(oldRange.index)
+        let blotNew = getBlot(range.index)
+        // debugger;
+        let isBlockTex = (blot) => {
+            return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
+        }
+
+        let isInlineTex = blot => {
+            return blot.parent instanceof InlineTex
+        }
+        if ((isBlockTex(blotOld) && !isBlockTex(blotNew)) ||
+            (isInlineTex(blotOld) && !isInlineTex(blotNew))) {
+            let wasInline = isInlineTex(blotOld)
+            console.log("you exited inline or block tex.", blotOld)
+            // debugger;
+            let formula = blotOld.text;
+            let begin = quill.getIndex(blotOld);
+            let count = formula.length;
+
+
+            quill.deleteText(begin, count)
+            quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
+            tooltip.hide()
+
+        }
+        // console.log(blotOld, oldRange.index, blotNew, range.index, source)
+
+    }
 }
 
 
-
-class EnterHandlerClass{
+class EnterHandlerClass {
     constructor() {
 
     }
 
-    setQuillInstance(quill){
+    setQuillInstance(quill) {
         this.quill = quill;
     }
 
-    setTooltipInstance(tooltip){
+    setTooltipInstance(tooltip) {
         this.tooltip = tooltip;
     }
 
-    getHandler(name){
-    //
+    getHandler(name) {
+        //
         let _ = this;
         let f = (range, context) => {
             //     TODO
@@ -333,7 +331,7 @@ class EnterHandlerClass{
         return f;
     }
 
-    getBindings(){
+    getBindings() {
         let _ = this;
 
         return {
@@ -371,8 +369,6 @@ window.BlockTex = BlockTex
 window.BlockMath = BlockMath
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-
-
 
 
 window.EnterHandlerClass = EnterHandlerClass
