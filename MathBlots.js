@@ -55,7 +55,12 @@ function MathNodeMouseUpHandler(node, attr) {
         let formula = node.getAttribute('latex')
         // debugger;
 
+        // debugger;
+        // let index = quill.getSelection().index;
         quill.insertText(begin, formula, attr)
+        // set cursor position to be the beginning of the math editor
+        quill.setSelection(begin+1)
+
 
         node.remove()
         let formulaHTML = MathJax.tex2svg(formula);
@@ -368,7 +373,7 @@ class EnterHandlerClass {
                             quill.deleteText(index-2, 2)
 
                         }else{
-                            alert("hey! no!")
+                            // alert("hey! no!")
 
                             quill.deleteText(index-2, 2)
                             index = index - 2;
