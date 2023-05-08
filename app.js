@@ -90,34 +90,21 @@ let quill = new Quill('#editor-container', {
 
 
 
+/**
+ * For inline math edit
+ */
+$('#tweet-button').click(function() {
+    let range = quill.getSelection(true);
+    let latex = String.raw `\int f(x)dx = F(x)+C`;
 
-
-
-
-$('#bold-button').click(function() {
-    quill.format('bold', true);
-});
-$('#italic-button').click(function() {
-    quill.format('italic', true);
-});
-
-$('#link-button').click(function() {
-    let value = prompt('Enter link URL');
-    quill.format('link', value);
+    let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
+    quill.insertText(range.index, ' ', {"inlinetex": true})
 });
 
-$('#blockquote-button').click(function() {
-    quill.format('blockquote', true);
-});
 
-$('#header-1-button').click(function() {
-    quill.format('header', 1);
-});
-
-$('#header-2-button').click(function() {
-    quill.format('header', 2);
-});
-
+/**
+ * For block math edit
+ */
 $('#divider-button').click(function() {
     // let range = quill.getSelection(true);
     // quill.insertText(range.index, '\n', Quill.sources.USER);
@@ -135,13 +122,5 @@ $('#divider-button').click(function() {
 
 
 
-$('#tweet-button').click(function() {
-    let range = quill.getSelection(true);
-    let latex = String.raw `\int f(x)dx = F(x)+C`;
-    // quill.insertText(range.index, '\n', Quill.sources.USER);
-    quill.insertText(range.index, String.raw `\vec{F} = m\vec{a}`, {"inlinetex": true})
 
-    // quill.insertEmbed(range.index + 1, 'mathbox-inline', latex, Quill.sources.USER);
-    // quill.setSelection(range.index + 2, Quill.sources.SILENT);
-});
 //

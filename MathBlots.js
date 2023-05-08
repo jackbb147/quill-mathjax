@@ -1,5 +1,27 @@
+/**
+ * How to use:
+ *
+ * Quill.register(Block)
+ * Quill.register(BlockMath)
+ * Quill.register(BlockTex)
+ * Quill.register(InlineTex)
+ * Quill.register(TweetBlot);
+ * Quill.register('modules/MathEditorModule', MathEditorModule)
+ * let enterHandler = new EnterHandlerClass();
+ * let quill = new Quill('#editor-container', {
+ *     theme: "bubble",
+ *     modules:{
+ *         MathEditorModule: {
+ *             enterHandler
+ *         },
+ *         keyboard:
+ *             {
+ *             bindings: enterHandler.getBindings()
+ *         }
+ *     }
+ * });
+ */
 let Inline = Quill.import('blots/inline');
-// let Inline = Quill.import('blots/inline');
 let Block = Quill.import('blots/block');
 let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
@@ -8,10 +30,11 @@ const Tooltip = Quill.import('ui/tooltip');
 
 console.log(SyntaxCodeBlock)
 
-
-
 window.SyntaxCodeBlock = SyntaxCodeBlock
 window.Block = Block;
+
+
+// TODO refactor this somewhere else....
 // Helper function to get the blot at the cursoor position.
 function getBlot(index){
     if(index === undefined) index = quill.getSelection().index;
@@ -192,7 +215,7 @@ class MathEditorModule{
                 tooltip.hide()
 
             }
-            console.log(blotOld, oldRange.index, blotNew, range.index, source)
+            // console.log(blotOld, oldRange.index, blotNew, range.index, source)
 
         })
         quill.on("text-change", (delta, oldDelta, source)=>{
@@ -200,17 +223,19 @@ class MathEditorModule{
 
             if(!quill.getSelection()) return;
 
-            let blotName = quill.getLeaf(quill.getSelection().index)[0].parent.constructor.blotName
+            let blot = quill.getLeaf(quill.getSelection().index)[0]
+            // debugger;
+            let blotName = blot.parent.constructor.blotName
             console.log(blotName)
             if(blotName === 'inlinetex' || blotName === 'code-block'){
                 let isInline = blotName==='inlinetex'
                 // debugger;
                 let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-                let blot = quill.getLeaf(begin)
+                // let blot = quill.getLeaf(begin)
 
 
-                let formula = blot[0].text;
-
+                let formula = blot.text;
+                // debugger;
                 tooltip.show()
 
                 if(!isInline){
@@ -323,7 +348,15 @@ class EnterHandlerClass{
                 format: ['inlinetex'],
                 metaKey: null,
                 handler: _.getHandler('mathbox-inline')
-            }
+            },
+            // left: {
+            //     key: 37,
+            //     handler: (range, context)=>{
+            //         console.log("left pressed", range, context)
+            //
+            //         return true;
+            //     }
+            // }
         };
     }
 
@@ -332,38 +365,16 @@ class EnterHandlerClass{
 
 
 // TODO probably need to get rid of these global-namespaced variables...
-
 window.TweetBlot = TweetBlot
 window.InlineTex = InlineTex
 window.BlockTex = BlockTex
 window.BlockMath = BlockMath
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-// window.EnterHandler = EnterHandler
 
 
-/**
- * How to use:
- *
- * Quill.register(Block)
- * Quill.register(BlockMath)
- * Quill.register(BlockTex)
- * Quill.register(InlineTex)
- * Quill.register(TweetBlot);
- * Quill.register('modules/MathEditorModule', MathEditorModule)
- * let enterHandler = new EnterHandlerClass();
- * let quill = new Quill('#editor-container', {
- *     theme: "bubble",
- *     modules:{
- *         MathEditorModule: {
- *             enterHandler
- *         },
- *         keyboard:
- *             {
- *             bindings: enterHandler.getBindings()
- *         }
- *     }
- * });
- * @type {EnterHandlerClass}
- */
+
+
 window.EnterHandlerClass = EnterHandlerClass
+
+
