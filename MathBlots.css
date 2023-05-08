@@ -1,6 +1,5 @@
 
 
-
 .math-tooltip {
     /*borde*/
 /*    tooltip.root.style["border-radius"] = "5px"*/
@@ -10,4 +9,10 @@
 
 .fullwidth {
     width: 100%;
+}
+
+/*TODO refactor this selector... */
+.ql-bubble .ql-editor .inlinetex{
+    background-color: #23241f;
+    color: #f8f8f2;
 }
