@@ -350,6 +350,38 @@ class EnterHandlerClass {
                 metaKey: null,
                 handler: _.getHandler('mathbox-inline')
             },
+            startBlockMathEdit:{
+                key: 'enter',
+                handler: (range, context)=>{
+                    // alert("hey!")
+                    let quill = _.quill;
+                    let prefix = context.prefix;
+                    let lastTwo = prefix.slice(-2);
+                    let index = range.index;
+                    let offset = context.offset;
+                    console.log("Hey, you pressed enter. ", range, context, lastTwo, quill.getLine(index))
+
+                    if(lastTwo === '$$'){
+
+                        if(offset === 2){
+                            quill.format('code-block', true)
+                            quill.deleteText(index-2, 2)
+
+                        }else{
+                            alert("hey! no!")
+
+                            quill.deleteText(index-2, 2)
+                            index = index - 2;
+                            quill.insertText(index, `\n`)
+                            quill.format('code-block', true)
+
+
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            },
             backspace: {
                 key: 'backspace',
                 format: ['inlinetex', 'code-block'],
