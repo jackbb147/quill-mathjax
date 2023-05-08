@@ -50,7 +50,7 @@ window.BlockquoteBlot = BlockquoteBlot
 
 Quill.register(Block)
 Quill.register(BlockMath)
-Quill.register(BlockTex)
+
 Quill.register(InlineTex)
 Quill.register(BoldBlot);
 Quill.register(ItalicBlot);
@@ -106,16 +106,14 @@ $('#tweet-button').click(function() {
  * For block math edit
  */
 $('#divider-button').click(function() {
-    // let range = quill.getSelection(true);
-    // quill.insertText(range.index, '\n', Quill.sources.USER);
-    // quill.insertEmbed(range.index + 1, 'divider', true, Quill.sources.USER);
     // quill.setSelection(range.index + 2, Quill.sources.SILENT);
     let range = quill.getSelection(true);
     let latex = String.raw `\int f(x)dx = F(x)+C`;
-    // quill.insertText(range.index, '\n', Quill.sources.USER);
+
     // debugger;
-    // quill.insertText(0, "hello", "blockquote", true)
+    // TODO
     quill.format("code-block", true)
+
 
 
 });
