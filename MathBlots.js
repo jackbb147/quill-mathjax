@@ -467,6 +467,23 @@ class BlockTexEditor extends BlockEmbed{
     //     super();
     // }
 
+    /**
+     *
+     * @param value{String} latex source code
+     * @returns {*}
+     */
+    static create(value=""){
+        let node = super.create();
+        // TODO
+        node.setAttribute("latex", value)
+        return node
+    }
+
+    static value(node){
+        return node.getAttribute("latex")
+    }
+
+
 }
 
 BlockTexEditor.blotName = 'blocktexeditor';

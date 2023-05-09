@@ -128,8 +128,12 @@ $('#divider-button').click(function() {
     editor.setOptions({
         enableBasicAutocompletion: true,
         enableSnippets: true,
-        enableLiveAutocompletion: true
+        enableLiveAutocompletion: true,
+        maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
     });
+    // editor.setAutoScrollEditorIntoView(true);
+
+    window.editor = editor;
 
     // quill.format("code-block", true)
 });

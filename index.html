@@ -54,10 +54,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.19.0/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.19.0/ext-language_tools.min.js"></script>
     <style type="text/css" media="screen">
-        .blocktexeditor, #editor {
-            position: absolute;
+        .blocktexeditor {
+            position: relative;
+            width: 100%;
             /*top: 0;*/
-            top: 50%;
+            min-height: 5rem;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        #editor{
+            position: absolute;
+            top: 80%;
             right: 0;
             bottom: 0;
             left: 0;
@@ -90,7 +99,7 @@
     var langTools = ace.require("ace/ext/language_tools");
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/latex");
-    // editor.session.setMode("ace/mode/javascript");
+
     var staticWordCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
             // var wordList = [String.raw `\foo`, "bar", "baz"];
