@@ -144,7 +144,6 @@ TweetBlot.className = 'mathbox-inline';
 class InlineTex extends Inline {
 
 }
-
 InlineTex.blotName = 'inlinetex'
 InlineTex.tagName = 'code'
 InlineTex.className = 'inlinetex'
@@ -155,7 +154,6 @@ class MyToolTip extends Tooltip {
 }
 
 
-// This is the innerHTML of the tooltip.
 // https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
 MyToolTip.TEMPLATE = `
 <!--<span>hello</span>-->
