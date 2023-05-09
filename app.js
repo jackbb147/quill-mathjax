@@ -50,6 +50,7 @@ window.BlockquoteBlot = BlockquoteBlot
 
 Quill.register(Block)
 Quill.register(BlockMath)
+Quill.register(BlockTexEditor)
 
 Quill.register(InlineTex)
 Quill.register(BoldBlot);
@@ -112,10 +113,25 @@ $('#divider-button').click(function() {
 
     // debugger;
     // TODO
-    quill.format("code-block", true)
+    let blockTexEditorClassName = "blocktexeditor"
+    quill.insertEmbed(range.index + 1, blockTexEditorClassName, true, Quill.sources.USER);
+    quill.setSelection(range.index + 1, Quill.sources.SILENT);
 
 
+    // TODO refactor this somewhere else!
+    let node = document.getElementsByClassName(blockTexEditorClassName)[0]
+    var editor = ace.edit(node);
+    var langTools = ace.require("ace/ext/language_tools");
 
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/latex");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    });
+
+    // quill.format("code-block", true)
 });
 
 

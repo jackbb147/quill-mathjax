@@ -241,7 +241,6 @@ class MathEditorModule {
                 if (tooltip.root.classList.contains('fullwidth')) {
                     tooltip.root.classList.remove('fullwidth')
                 }
-
                 // debugger;
                 let bounds = quill.getBounds(quill.getIndex(getBlot()));
 
@@ -463,7 +462,26 @@ class EnterHandlerClass {
 }
 
 
+class BlockTexEditor extends BlockEmbed{
+    // constructor() {
+    //     super();
+    // }
+
+}
+
+BlockTexEditor.blotName = 'blocktexeditor';
+BlockTexEditor.tagName = 'div';
+BlockTexEditor.className = 'blocktexeditor'
+
+
+
+
+
+
+
+
 // TODO probably need to get rid of these global-namespaced variables...
+window.BlockTexEditor = BlockTexEditor
 window.TweetBlot = TweetBlot
 window.InlineTex = InlineTex
 window.BlockMath = BlockMath
