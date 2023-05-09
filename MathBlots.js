@@ -148,7 +148,6 @@ class InlineTex extends Inline {
 InlineTex.blotName = 'inlinetex'
 InlineTex.tagName = 'code'
 InlineTex.className = 'inlinetex'
-
 class MyToolTip extends Tooltip {
     constructor(quill, bounds) {
         super(quill, bounds);
