@@ -1,5 +1,6 @@
 const FORMAT_BLOCKTEXEDIT = "blockwrapper"
 const blockTexEditorClassName = "blocktexeditor"
+const EDITOR_CONTAINER_FONTSIZE = "15px"
 /**
  * How to use:
  *
@@ -55,7 +56,7 @@ function configureACEEditor(node, formula){
     var editor = ace.edit(editorNode);
     var langTools = ace.require("ace/ext/language_tools");
 
-    editor.setFontSize("15px") // todo refactor this
+    editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/latex");
 
@@ -130,27 +131,7 @@ function configureACEEditor(node, formula){
 
         tooltip.root.style.top = `${bounds.bottom}px`;
         // =============
-
-
-
         tooltip.root.style.left = `0px`;
-
-            // tooltip.root.style.left = `${bounds.left}px`;
-        // }
-        // else { // todo this is for inline
-        //     if (tooltip.root.classList.contains('fullwidth')) {
-        //         tooltip.root.classList.remove('fullwidth')
-        //     }
-        //     // debugger;
-        //     let bounds = quill.getBounds(quill.getIndex(getBlot()));
-        //
-        //     console.log(bounds)
-        //
-        //
-        //     tooltip.root.style.top = `${bounds.bottom}px`;
-        //     tooltip.root.style.left = `${bounds.left}px`;
-        // }
-
         let typesetted = MathJax.tex2svg(formula);
         tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
     })

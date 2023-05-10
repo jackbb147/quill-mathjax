@@ -85,6 +85,12 @@ let quill = new Quill('#editor-container', {
     }
 });
 
+function setFontSize(){
+    document.getElementById("editor-container").style.fontSize = EDITOR_CONTAINER_FONTSIZE
+}
+
+setFontSize()
+
 
 
 
