@@ -78,7 +78,7 @@ function configureACEEditor(node, formula){
     editor.setOptions({
         enableBasicAutocompletion: true,
         enableSnippets: true,
-        enableLiveAutocompletion: true,
+        // enableLiveAutocompletion: true,
         maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
     });
     // editor.setAutoScrollEditorIntoView(true);
@@ -138,6 +138,50 @@ function configureACEEditor(node, formula){
 }
 
 /**
+ * insert an ACE editor at the specified index.
+ * @param index
+ * @param latex the default text input to feed into the editor
+ */
+function insertBlockTexEditor(index, latex){
+    // quill.insertText(begin, formula, attr)
+    quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
+    quill.setSelection(index, Quill.sources.SILENT);
+
+    // == ========= editor stuff
+    configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
+
+}
+
+
+function replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
+    // debugger;
+    let node = blockMathNode
+    let begin = quill.getIndex(node.__blot.blot)
+    let formula = node.getAttribute('latex')
+
+    // debugger;
+
+    // TODO this wouldn't be an insert text. It should be an insertEmbed
+    insertBlockTexEditor(begin, formula)
+
+    // == =========
+    // set cursor position to be the beginning of the math editor
+    // TODO
+    // quill.setSelection(begin+1)
+
+
+    node.remove()
+    let formulaHTML = MathJax.tex2svg(formula);
+    tooltip.show()
+
+    tooltip.root.innerHTML = `
+                <span class="ql-tooltip-arrow"></span>
+                ${formulaHTML.outerHTML}
+            `;
+}
+
+
+/**
  *
  * @param node
  * @param attr {'code-block': true} or {'inlinetex': true}
@@ -146,37 +190,8 @@ function configureACEEditor(node, formula){
  */
 function MathNodeMouseUpHandler(node, attr) {
     return (e) => {
+        replaceBlockMathWithBlockEdit(node, quill, attr)
 
-        // debugger;
-        let begin = quill.getIndex(node.__blot.blot)
-        let formula = node.getAttribute('latex')
-        // debugger;
-
-        // debugger;
-
-        // TODO this wouldn't be an insert text. It should be an insertEmbed
-        // quill.insertText(begin, formula, attr)
-        quill.insertEmbed(begin, blockTexEditorClassName, true, Quill.sources.USER);
-        quill.setSelection(begin, Quill.sources.SILENT);
-
-        // == ========= editor stuff
-        configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], formula)
-
-
-        // == =========
-        // set cursor position to be the beginning of the math editor
-        // TODO
-        // quill.setSelection(begin+1)
-
-
-        node.remove()
-        let formulaHTML = MathJax.tex2svg(formula);
-        tooltip.show()
-
-        tooltip.root.innerHTML = `
-                <span class="ql-tooltip-arrow"></span>
-                ${formulaHTML.outerHTML}
-            `;
     }
 }
 
