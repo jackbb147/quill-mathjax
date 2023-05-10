@@ -579,6 +579,17 @@ class EnterHandlerClass {
                     return true;
                 }
             },
+
+            dollarSign: {
+                key: 52,
+                shiftKey: true,
+                handler: ()=>{
+                    console.log("hey! dollar sign pressed")
+                    let index = quill.getSelection().index;
+                    quill.insertText(index, '$$')
+                    quill.setSelection(index+1)
+                }
+            }
             // startInlineMathEdit: {
             //     key: 52,
             //     shiftKey: true,
