@@ -119,7 +119,7 @@ $('#divider-button').click(function() {
     let range = quill.getSelection(true);
     let latex = String.raw `\int f(x)dx = F(x)+C`;
 
-    // debugger;
+    //  ;
     // TODO
     let blockTexEditorClassName = "blocktexeditor"
     // quill.format("blockwrapper", true) //todo
