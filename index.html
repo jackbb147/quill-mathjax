@@ -120,6 +120,19 @@
         enableLiveAutocompletion: true
     });
     editor.completers.push(staticWordCompleter)
+
+    editor.commands.addCommand({
+        name: 'myCommand',
+        // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+        bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+        exec: function(editor) {
+            //...
+            alert("hey!")
+        },
+        readOnly: true, // false if this command should not apply in readOnly mode
+        // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+        // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+    });
 </script>
 </body>
 

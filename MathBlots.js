@@ -1,3 +1,5 @@
+const FORMAT_BLOCKTEXEDIT = "blockwrapper"
+
 /**
  * How to use:
  *
@@ -341,6 +343,14 @@ class EnterHandlerClass {
         let _ = this;
 
         return {
+            blocktexEdit: {
+                key: "enter",
+                metaKey: true,
+                format: [FORMAT_BLOCKTEXEDIT],
+                handler: (range, context)=>{
+                    alert("hey from quill!")
+                }
+            },
             cmd_enter: {
                 key: 'enter',
                 format: ['code-block'],
@@ -483,6 +493,18 @@ class BlockTexEditor extends BlockEmbed{
         return node.getAttribute("latex")
     }
 
+    // This method hooks up the keybindings to this embed.
+    formats(){
+        let res = {}
+        res[FORMAT_BLOCKTEXEDIT] = true
+        return res
+    }
+
+    // format(name, value){
+    //     debugger;
+    //
+    // }
+
 
 }
 
@@ -496,8 +518,16 @@ BlockTexEditor.className = 'blocktexeditor'
 
 
 
+class BlockWrapper extends Block {
+
+}
+
+BlockWrapper.blotName = 'blockwrapper'
+BlockWrapper.tagName = 'div'
+BlockWrapper.className = 'blockwrapper'
 
 // TODO probably need to get rid of these global-namespaced variables...
+window.BlockWrapper = BlockWrapper
 window.BlockTexEditor = BlockTexEditor
 window.TweetBlot = TweetBlot
 window.InlineTex = InlineTex

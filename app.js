@@ -49,8 +49,10 @@ window.BlockquoteBlot = BlockquoteBlot
 
 
 Quill.register(Block)
+
 Quill.register(BlockMath)
 Quill.register(BlockTexEditor)
+Quill.register(BlockWrapper)
 
 Quill.register(InlineTex)
 Quill.register(BoldBlot);
@@ -114,8 +116,12 @@ $('#divider-button').click(function() {
     // debugger;
     // TODO
     let blockTexEditorClassName = "blocktexeditor"
+    quill.format("blockwrapper", true)
     quill.insertEmbed(range.index + 1, blockTexEditorClassName, true, Quill.sources.USER);
     quill.setSelection(range.index + 1, Quill.sources.SILENT);
+
+
+
 
 
     // TODO refactor this somewhere else!
@@ -135,10 +141,27 @@ $('#divider-button').click(function() {
 
     window.editor = editor;
 
+    editor.commands.addCommand({
+        name: 'myCommand',
+        // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+        bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+        exec: function(editor) {
+            //...
+            alert("hey!")
+            quill.deleteText(quill.getSelection().index, 1)
+            return true;
+        },
+        readOnly: true, // false if this command should not apply in readOnly mode
+        // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+        // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+    });
+
     // quill.format("code-block", true)
 });
 
 
-
+window.f = ()=>{
+    quill.format("blockwrapper", true)
+}
 
 //
