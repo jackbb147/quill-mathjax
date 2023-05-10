@@ -185,19 +185,6 @@ function replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
 }
 
 
-/**
- *
- * @param node
- * @param attr {'code-block': true} or {'inlinetex': true}
- * @returns {(function(*): void)|*}
- * @constructor
- */
-function MathNodeMouseUpHandler(node, attr) {
-    return (e) => {
-        replaceBlockMathWithBlockEdit(node, quill, attr)
-
-    }
-}
 
 
 // https://stackoverflow.com/a/62778691
@@ -230,11 +217,25 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
 
 
         //
-        node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
+        node.addEventListener('mouseup', BlockMath.MouseUpHandler(node, {
             'code-block': true
         }))
         return node;
     }
+
+    /**
+     * convert a mathjax block into a tex edit block.
+     * @param node
+     * @param attr {'code-block': true} or {'inlinetex': true}
+     * @returns {(function(*): void)|*}
+     * @constructor
+     */
+    static MouseUpHandler(node, attr) {
+        return (e) => {
+            replaceBlockMathWithBlockEdit(node, quill, attr)
+        }
+    }
+
 }
 
 BlockMath.tagName = 'div'
