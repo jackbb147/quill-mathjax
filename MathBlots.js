@@ -1,5 +1,5 @@
 const FORMAT_BLOCKTEXEDIT = "blockwrapper"
-
+const blockTexEditorClassName = "blocktexeditor"
 /**
  * How to use:
  *
@@ -53,15 +53,52 @@ window.getBlot = getBlot
  */
 function MathNodeMouseUpHandler(node, attr) {
     return (e) => {
+
+        debugger;
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
         // debugger;
 
         // debugger;
-        // let index = quill.getSelection().index;
-        quill.insertText(begin, formula, attr)
+
+        // TODO this wouldn't be an insert text. It should be an insertEmbed
+        // quill.insertText(begin, formula, attr)
+        quill.insertEmbed(begin, blockTexEditorClassName, true, Quill.sources.USER);
+        quill.setSelection(begin, Quill.sources.SILENT);
+
+        // == ========= editor stuff
+        var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
+        var editor = ace.edit(editorNode);
+        var langTools = ace.require("ace/ext/language_tools");
+
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/latex");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+        });
+        // editor.setAutoScrollEditorIntoView(true);
+
+        editor.setValue(formula)
+        window.editor = editor;
+
+        editor.commands.addCommand({
+            name: 'myCommand',
+            // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+            bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+            exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+            readOnly: true, // false if this command should not apply in readOnly mode
+            // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+            // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+        });
+
+
+        // == =========
         // set cursor position to be the beginning of the math editor
-        quill.setSelection(begin+1)
+        // TODO
+        // quill.setSelection(begin+1)
 
 
         node.remove()
@@ -72,9 +109,6 @@ function MathNodeMouseUpHandler(node, attr) {
                 <span class="ql-tooltip-arrow"></span>
                 ${formulaHTML.outerHTML}
             `;
-
-
-
     }
 }
 
@@ -107,6 +141,8 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
         //TODO
         let node = super.create(latex)
 
+
+        debugger
         node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
             'code-block': true
         }))
@@ -318,7 +354,7 @@ class EnterHandlerClass {
          */
         let f = (editor) => {
 
-            debugger;
+            // debugger;
 
             let quill = _.quill
             let tooltip = _.tooltip;
@@ -333,7 +369,7 @@ class EnterHandlerClass {
             let indexOfEditor = quill.getSelection().index;
             quill.deleteText(indexOfEditor, 1)
 
-            debugger;
+            // debugger;
             quill.insertEmbed(indexOfEditor, "mathbox-block", formula, "silent");
             tooltip.hide()
         }
