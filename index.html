@@ -95,44 +95,9 @@
     <script src="app.js"></script>
 
 <script>
-    var editor = ace.edit("editor");
-    var langTools = ace.require("ace/ext/language_tools");
-    editor.setTheme("ace/theme/monokai");
-    editor.session.setMode("ace/mode/latex");
-
-    var staticWordCompleter = {
-        getCompletions: function(editor, session, pos, prefix, callback) {
-            // var wordList = [String.raw `\foo`, "bar", "baz"];
-            var wordList  = MATHJAXCOMMANDS
-            callback(null, wordList.map(function(word) {
-                return {
-                    caption: word,
-                    value: word,
-                    meta: "static"
-                };
-            }));
-
-        }
-    }
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true
-    });
-    editor.completers.push(staticWordCompleter)
-
-    editor.commands.addCommand({
-        name: 'myCommand',
-        // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
-        bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-        exec: function(editor) {
-            //...
-            alert("hey!")
-        },
-        readOnly: true, // false if this command should not apply in readOnly mode
-        // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
-        // scrollIntoView: "cursor", control how cursor is scolled into view after the command
-    });
+    console.assert(window.configureACEEditor)
+    let node = document.getElementById("editor")
+    // configureACEEditor(node, "\\sum") // uncomment this to debug
 </script>
 </body>
 

@@ -45,6 +45,118 @@ function getBlot(index) {
 window.getBlot = getBlot
 
 /**
+ * TODO refactor this ...
+ * @param formula
+ */
+function configureACEEditor(node, formula){
+    // debugger
+    // var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
+    var editorNode = node
+    var editor = ace.edit(editorNode);
+    var langTools = ace.require("ace/ext/language_tools");
+
+    editor.setFontSize("15px") // todo refactor this
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/latex");
+
+    var staticWordCompleter = {
+        getCompletions: function(editor, session, pos, prefix, callback) {
+            // var wordList = [String.raw `\foo`, "bar", "baz"];
+            var wordList  = MATHJAXCOMMANDS
+            callback(null, wordList.map(function(word) {
+                return {
+                    caption: word,
+                    value: word,
+                    meta: "static"
+                };
+            }));
+
+        }
+    }
+
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+    });
+    // editor.setAutoScrollEditorIntoView(true);
+
+    editor.completers.push(staticWordCompleter)
+
+    editor.setValue(formula)
+    window.editor = editor;
+
+    editor.commands.addCommand({
+        name: 'myCommand',
+        // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+        bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+        exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+        readOnly: true, // false if this command should not apply in readOnly mode
+        // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+        // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+    });
+
+    editor.session.on("change", (delta)=>{
+        // debugger;
+        // let isInline = blotName === 'inlinetex'
+        // debugger;
+        // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
+        // let blot = quill.getLeaf(begin)
+
+
+        let formula = editor.getValue()
+        // debugger;
+
+        tooltip.show() //todo refactor this
+
+        // if (!isInline) {
+            // tooltip.root.style.width = "100%"
+        tooltip.root.classList.add('fullwidth')
+
+        // debugger;
+        // TODO  =========
+        let bounds = quill.getBounds(
+            formula.length + quill.getSelection().index
+        );
+        // debugger;
+        console.log(bounds)
+        formula = String.raw`
+                    \displaylines{ ${formula} }
+                `
+
+        console.log(formula)
+
+
+        tooltip.root.style.top = `${bounds.bottom}px`;
+        // =============
+
+
+
+        tooltip.root.style.left = `0px`;
+
+            // tooltip.root.style.left = `${bounds.left}px`;
+        // }
+        // else { // todo this is for inline
+        //     if (tooltip.root.classList.contains('fullwidth')) {
+        //         tooltip.root.classList.remove('fullwidth')
+        //     }
+        //     // debugger;
+        //     let bounds = quill.getBounds(quill.getIndex(getBlot()));
+        //
+        //     console.log(bounds)
+        //
+        //
+        //     tooltip.root.style.top = `${bounds.bottom}px`;
+        //     tooltip.root.style.left = `${bounds.left}px`;
+        // }
+
+        let typesetted = MathJax.tex2svg(formula);
+        tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
+    })
+}
+
+/**
  *
  * @param node
  * @param attr {'code-block': true} or {'inlinetex': true}
@@ -54,7 +166,7 @@ window.getBlot = getBlot
 function MathNodeMouseUpHandler(node, attr) {
     return (e) => {
 
-        debugger;
+        // debugger;
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
         // debugger;
@@ -67,32 +179,7 @@ function MathNodeMouseUpHandler(node, attr) {
         quill.setSelection(begin, Quill.sources.SILENT);
 
         // == ========= editor stuff
-        var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
-        var editor = ace.edit(editorNode);
-        var langTools = ace.require("ace/ext/language_tools");
-
-        editor.setTheme("ace/theme/monokai");
-        editor.session.setMode("ace/mode/latex");
-        editor.setOptions({
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true,
-            maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
-        });
-        // editor.setAutoScrollEditorIntoView(true);
-
-        editor.setValue(formula)
-        window.editor = editor;
-
-        editor.commands.addCommand({
-            name: 'myCommand',
-            // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
-            bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-            exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
-            readOnly: true, // false if this command should not apply in readOnly mode
-            // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
-            // scrollIntoView: "cursor", control how cursor is scolled into view after the command
-        });
+        configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], formula)
 
 
         // == =========
@@ -142,7 +229,7 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
         let node = super.create(latex)
 
 
-        debugger
+        // debugger
         node.addEventListener('mouseup', MathNodeMouseUpHandler(node, {
             'code-block': true
         }))
