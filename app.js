@@ -116,12 +116,9 @@ $('#divider-button').click(function() {
     // debugger;
     // TODO
     let blockTexEditorClassName = "blocktexeditor"
-    quill.format("blockwrapper", true)
+    // quill.format("blockwrapper", true) //todo
     quill.insertEmbed(range.index + 1, blockTexEditorClassName, true, Quill.sources.USER);
     quill.setSelection(range.index + 1, Quill.sources.SILENT);
-
-
-
 
 
     // TODO refactor this somewhere else!
@@ -145,18 +142,11 @@ $('#divider-button').click(function() {
         name: 'myCommand',
         // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
         bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-        exec: function(editor) {
-            //...
-            alert("hey!")
-            quill.deleteText(quill.getSelection().index, 1)
-            return true;
-        },
+        exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
         readOnly: true, // false if this command should not apply in readOnly mode
         // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
         // scrollIntoView: "cursor", control how cursor is scolled into view after the command
     });
-
-    // quill.format("code-block", true)
 });
 
 

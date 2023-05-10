@@ -310,6 +310,37 @@ class EnterHandlerClass {
         this.tooltip = tooltip;
     }
 
+    static getConvertEditorToMathHandler(enterHandler){
+        let _ = enterHandler;
+        /**
+         *
+         * @param editor
+         */
+        let f = (editor) => {
+
+            debugger;
+
+            let quill = _.quill
+            let tooltip = _.tooltip;
+            // TODO get the right formula
+            let formula = editor.getValue() //todo
+            console.log("hey! you wanna typeset the formula? ")
+            // debugger;
+            console.log(formula)
+
+            let count = formula.length;
+
+            let indexOfEditor = quill.getSelection().index;
+            quill.deleteText(indexOfEditor, 1)
+
+            debugger;
+            quill.insertEmbed(indexOfEditor, "mathbox-block", formula, "silent");
+            tooltip.hide()
+        }
+        return f
+    }
+
+    // TODO rename this
     getHandler(name) {
         //
         let _ = this;
@@ -343,18 +374,19 @@ class EnterHandlerClass {
         let _ = this;
 
         return {
-            blocktexEdit: {
-                key: "enter",
-                metaKey: true,
-                format: [FORMAT_BLOCKTEXEDIT],
-                handler: (range, context)=>{
-                    alert("hey from quill!")
-                }
-            },
+            // TODO is there a way to somehow propagate the keyboard event from the ace editor up to the enclosing quill instance?
+            // blocktexEdit: {
+            //     key: "enter",
+            //     metaKey: true,
+            //     format: [FORMAT_BLOCKTEXEDIT],
+            //     handler: (range, context)=>{
+            //         alert("hey from quill!")
+            //     }
+            // },
             cmd_enter: {
                 key: 'enter',
-                format: ['code-block'],
                 metaKey: true,
+                format: ['code-block'],
                 handler: _.getHandler('mathbox-block')
             },
             enter: {
