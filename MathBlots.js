@@ -539,14 +539,11 @@ class EnterHandlerClass {
 
 
                         }else{
-                            alert("hey! no!")
-
-                            // quill.deleteText(index-2, 2)
-                            // index = index - 2;
-                            // quill.insertText(index, `\n`)
-                            // quill.format('code-block', true)
-
-
+                            // alert("hey! no!")
+                            quill.deleteText(index-2, 2)
+                            index = index - 2;
+                            quill.insertText(index, `\n`)
+                            insertBlockTexEditor(index + 1, "")
                         }
                         return false;
                     }
