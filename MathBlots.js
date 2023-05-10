@@ -147,7 +147,8 @@ function configureACEEditor(node, formula){
  */
 function insertBlockTexEditor(index, latex){
     // quill.insertText(begin, formula, attr)
-    quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
+    let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
+
 
 
     // == ========= editor stuff
@@ -214,11 +215,9 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
     static create(latex) {
         //TODO
         let node = super.create(latex)
-
-
         //
         node.addEventListener('mouseup', BlockMath.MouseUpHandler(node, {
-            'code-block': true
+            'code-block': true // todo get rid of this 'code-block'
         }))
         return node;
     }
@@ -385,33 +384,41 @@ class MathEditorModule {
         }
     }
 
+    // This implements the 'click away' feature that automatically
+    // typesets latex source code into mathjax block.
     handleSelectionChange(range, oldRange, source) {
         //  ;
 
+        // console.log("hey! ", range, oldRange, source)
         if (source !== 'user' || !range || !oldRange) return;
         let blotOld = getBlot(oldRange.index)
         let blotNew = getBlot(range.index)
-        //  ;
         let isBlockTex = (blot) => {
-            return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
+            // debugger;
+            return blot.statics.blotName === blockTexEditorClassName
+            // return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
         }
 
         let isInlineTex = blot => {
             return blot.parent instanceof InlineTex
         }
-        if ((isBlockTex(blotOld) && !isBlockTex(blotNew)) ||
-            (isInlineTex(blotOld) && !isInlineTex(blotNew))) {
-            let wasInline = isInlineTex(blotOld)
+        console.log("hey! ", isBlockTex(blotOld),  isBlockTex(blotNew) )
+        //  ;
+
+        if ((isBlockTex(blotOld) && !isBlockTex(blotNew))
+            // ||
+            // (isInlineTex(blotOld) && !isInlineTex(blotNew))
+        ) {
+            // let wasInline = isInlineTex(blotOld)
             console.log("you exited inline or block tex.", blotOld)
-            //  ;
-            let formula = blotOld.text;
+            // debugger;
+            let editor = blotOld.domNode.env.editor;
+            let formula = editor.getValue()
+            // debugger;
             let begin = quill.getIndex(blotOld);
-            let count = formula.length;
-
-
-
+            let count = 1
             quill.deleteText(begin, count, 'silent')
-            quill.insertEmbed(begin, wasInline ? 'mathbox-inline' : 'mathbox-block', formula, Quill.sources.USER);
+            quill.insertEmbed(begin,  'mathbox-block', formula, Quill.sources.USER);
             tooltip.hide()
 
         }
@@ -654,6 +661,7 @@ class BlockTexEditor extends BlockEmbed{
         let node = super.create();
         // TODO
         node.setAttribute("latex", value)
+        node.setAttribute("isBlockTexEditor", true)
         return node
     }
 
@@ -676,9 +684,9 @@ class BlockTexEditor extends BlockEmbed{
 
 }
 
-BlockTexEditor.blotName = 'blocktexeditor';
+BlockTexEditor.blotName = blockTexEditorClassName;
 BlockTexEditor.tagName = 'div';
-BlockTexEditor.className = 'blocktexeditor'
+BlockTexEditor.className = blockTexEditorClassName
 
 
 
