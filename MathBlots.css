@@ -16,3 +16,8 @@
     background-color: #23241f;
     color: #f8f8f2;
 }
+
+.inline-editor-wrapper{
+    display: inline-block;
+    vertical-align: middle;
+}

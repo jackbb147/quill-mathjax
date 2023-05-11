@@ -48,11 +48,29 @@ function getBlot(index) {
 
 window.getBlot = getBlot
 
+// for inline ace editor auto resizing
+// numChars: number of characters. If undefined, use renderer.characterWidth
+function updateSize(e, renderer, numChars) {
+    var text = renderer.session.getLine(0);
+    var chars = renderer.session.$getStringScreenWidth(text)[0];
+
+    var width = Math.max(chars, 2) * (numChars || renderer.characterWidth) // text size
+        + 2 * renderer.$padding // padding
+        + 2 // little extra for the cursor
+        + 0 // add border width if needed
+
+    // update container size
+    debugger
+    renderer.container.style.width = width + "px";
+    // update computed size stored by the editor
+    renderer.onResize(false, 0, width, renderer.$size.height);
+}
 /**
  * TODO refactor this ...
  * @param formula
+ * @param isInline {Boolean}
  */
-function configureACEEditor(node, formula){
+function configureACEEditor(node, formula, isInline = false){
     //
     // var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
     var editorNode = node
@@ -79,6 +97,7 @@ function configureACEEditor(node, formula){
     }
 
     editor.setOptions({
+        showGutter: !isInline,
         enableBasicAutocompletion: true,
         enableSnippets: true,
         enableLiveAutocompletion: true,
@@ -137,7 +156,21 @@ function configureACEEditor(node, formula){
         tooltip.root.style.left = `0px`;
         let typesetted = MathJax.tex2svg(formula);
         tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
+
+        if(isInline){
+            updateSize(null, editor.renderer)
+            // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
+        }
+
+
     })
+
+    if(isInline){
+        // debugger;
+
+        updateSize(null, editor.renderer, formula.length)
+
+    }
 
     return editor;
 }
@@ -160,7 +193,7 @@ function insertBlockTexEditor(index, latex){
 }
 
 function insertInlineTexEditor(index, latex){
-    debugger;
+    // debugger;
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
     // let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
 
@@ -682,9 +715,20 @@ class EnterHandlerClass {
 class InlineTexEditor extends InlineEmbed {
     static create(value = ""){
         let node = super.create();
+        var node_wrappernode = document.createElement("div")
+
+        node_wrappernode.classList.add("inline-editor-wrapper")
+        node.appendChild(node_wrappernode)
+
+
         node.setAttribute("latex", value)
         node.setAttribute("isInlineTexEditor", true)
-        node.style.display = "inline"
+        node.style.display = "inline" // todo moe this to a css file
+        configureACEEditor(node_wrappernode, "\\sum", true)
+
+
+
+
         return node
     }
 
