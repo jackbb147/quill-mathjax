@@ -1,6 +1,8 @@
 const FORMAT_BLOCKTEXEDIT = "blockwrapper"
-const blockTexEditorClassName = "blocktexeditor"
+const blockTexEditorClassName = "blocktexeditor" //todo change this variable name
+const INLINE_TEX_EDITOR_CLASSNAME = "inlinetexeditor"
 const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE MUST BE KEPT IN SYNC WITH ACE'S EDITOR FONT SIZE, OTHERWISE TOOLTIP POSITIONING WILL BE OFF
+
 /**
  * How to use:
  *
@@ -153,8 +155,21 @@ function insertBlockTexEditor(index, latex){
 
     // == ========= editor stuff
     let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
-    // quill.setSelection(index+2, Emitter.sources.USER); //todo
-    // editor.focus()
+
+
+}
+
+function insertInlineTexEditor(index, latex){
+    debugger;
+    let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
+    // let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
+
+
+
+
+
+    // == ========= editor stuff
+    // let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassNam
 }
 
 
@@ -514,18 +529,18 @@ class EnterHandlerClass {
             //         alert("hey from quill!")
             //     }
             // },
-            cmd_enter: {
-                key: 'enter',
-                metaKey: true,
-                format: ['code-block'],
-                handler: _.getHandler('mathbox-block')
-            },
-            enter: {
-                key: 'enter',
-                format: ['inlinetex'],
-                metaKey: null,
-                handler: _.getHandler('mathbox-inline')
-            },
+            // cmd_enter: {
+            //     key: 'enter',
+            //     metaKey: true,
+            //     format: ['code-block'],
+            //     handler: _.getHandler('mathbox-block')
+            // },
+            // enter: {
+            //     key: 'enter',
+            //     format: ['inlinetex'],
+            //     metaKey: null,
+            //     handler: _.getHandler('mathbox-inline')
+            // },
             startBlockMathEdit:{
                 key: 'enter',
                 handler: (range, context)=>{
@@ -593,13 +608,32 @@ class EnterHandlerClass {
                     let index = quill.getSelection().index;
                     quill.insertText(index, '$$')
                     quill.setSelection(index+1)
+
+                    quill.once('text-change', (delta, oldDelta, source)=>{
+                        console.log("hey!")
+                        console.log(delta, oldDelta, source)
+
+                        let ops1 = delta.ops[1]; // todo change this name...
+
+                        if(ops1.hasOwnProperty("insert")){
+                            alert("hey! you wanna edit latex?")
+                            // let text =  ' ' + ops1.insert;
+                            // quill.deleteText(index, 2 + text.length)
+                            // //  ;
+                            // quill.insertText(index, text, {'inlinetex': true})
+                            // quill.setSelection(index+2)
+                        }else if(ops1.hasOwnProperty("delete")){
+                            console.log("hey! you dont wanna edit latex anymore?")
+                            quill.deleteText(index, 1)
+                        }
+                    })
                 }
-            }
+            },
             // startInlineMathEdit: {
             //     key: 52,
             //     shiftKey: true,
             //     handler: ()=>{
-            //     //     console.log("hey! dollar sign pressed")
+            //         alert("hey! dollar sign pressed")
             //     //     // return true;
             //     // //     TODO
             //     //     let index = _.quill.getSelection().index;
@@ -645,7 +679,24 @@ class EnterHandlerClass {
 
 
 }
+class InlineTexEditor extends InlineEmbed {
+    static create(value = ""){
+        let node = super.create();
+        node.setAttribute("latex", value)
+        node.setAttribute("isInlineTexEditor", true)
+        node.style.display = "inline"
+        return node
+    }
 
+    static value(node){
+        return node.getAttribute("latex")
+    }
+
+}
+
+InlineTexEditor.blotName = INLINE_TEX_EDITOR_CLASSNAME
+InlineTexEditor.className = INLINE_TEX_EDITOR_CLASSNAME
+InlineTexEditor.tagName = 'div';
 
 class BlockTexEditor extends BlockEmbed{
     // constructor() {

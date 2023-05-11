@@ -52,6 +52,7 @@ Quill.register(Block)
 
 Quill.register(BlockMath)
 Quill.register(BlockTexEditor)
+Quill.register(InlineTexEditor)
 Quill.register(BlockWrapper)
 
 Quill.register(InlineTex)
@@ -107,7 +108,11 @@ $('#tweet-button').click(function() {
     let latex = String.raw `\int f(x)dx = F(x)+C`;
 
     let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
-    quill.insertText(range.index, ' ', {"inlinetex": true})
+    // quill.insertText(range.index, ' ', {"inlinetex": true})
+    insertInlineTexEditor(range.index, defaultText)
+    // quill.insertEmbed(range.index + 1, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
+    // quill.setSelection(range.index + 1, Quill.sources.SILENT);
+
 });
 
 
