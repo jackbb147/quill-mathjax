@@ -51,10 +51,13 @@ window.getBlot = getBlot
 // for inline ace editor auto resizing
 // numChars: number of characters. If undefined, use renderer.characterWidth
 function updateSize(e, renderer, numChars) {
+    // debugger
     var text = renderer.session.getLine(0);
     var chars = renderer.session.$getStringScreenWidth(text)[0];
 
     // if(renderer.characterWidth === 0) debugger;
+    // if(renderer.characterWidth != 0) debugger;
+    // if(renderer.characterWidth === 0)  ;
     var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
         + 2 * renderer.$padding // padding
         + 2 // little extra for the cursor
@@ -62,7 +65,7 @@ function updateSize(e, renderer, numChars) {
 
     // update container size
 
-    // debugger
+    //  
     // console.log("hey")
     renderer.container.style.width = width + "px";
     // update computed size stored by the editor
@@ -73,12 +76,14 @@ function updateSize(e, renderer, numChars) {
  * @param formula
  * @param isInline {Boolean}
  */
-function configureACEEditor(node, formula, isInline = false){
-    debugger;
+function configureACEEditor(node, formula="", isInline = false){
+    //  ;
 
     //
     // var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
     var editorNode = node
+
+    // debugger
     var editor = ace.edit(editorNode);
     var langTools = ace.require("ace/ext/language_tools");
     // editor.focus()
@@ -112,12 +117,12 @@ function configureACEEditor(node, formula, isInline = false){
 
     });
 
-    // debugger
+    //  
 
     editor.setFontSize(15)
     editor.renderer.updateCharacterSize()
 
-    // debugger;
+    //  ;
     // editor.setAutoScrollEditorIntoView(true);
 
     editor.completers.push(staticWordCompleter)
@@ -129,21 +134,23 @@ function configureACEEditor(node, formula, isInline = false){
         name: 'myCommand',
         // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
         bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-        exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+        // TODO modify this for inline
+        exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler, isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
         readOnly: true, // false if this command should not apply in readOnly mode
         // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
         // scrollIntoView: "cursor", control how cursor is scolled into view after the command
     });
 
     editor.session.on("change", (delta)=>{
+        let quill = window.quill;
         //  ;
         // let isInline = blotName === 'inlinetex'
         //  ;
         // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
         // let blot = quill.getLeaf(begin)
 
-        debugger
-
+        //  
+        // debugger;
         let formula = editor.getValue()
         //  ;
 
@@ -173,7 +180,7 @@ function configureACEEditor(node, formula, isInline = false){
         let typesetted = MathJax.tex2svg(formula);
         tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
-        debugger;
+        //  ;
         if(isInline){
 
             updateSize(null, editor.renderer)
@@ -184,14 +191,21 @@ function configureACEEditor(node, formula, isInline = false){
 
     })
 
-    if(isInline){
-        // debugger;
-        // debugger
-        // editor.renderer.updateCharacterSize()
-        updateSize(null, editor.renderer, formula.length)
-        // editor.setValue(formula)
-        editor.setValue("")
-    }
+
+    // debugger
+    // editor.setValue(formula)
+    editor.insert(formula)
+
+
+    // if(isInline){
+    //     //  ;
+    //     //
+    //     // editor.renderer.updateCharacterSize()
+    //     updateSize(null, editor.renderer, formula.length)
+    //     // editor.setValue(formula)
+    //
+    // }
+
 
 
 
@@ -211,15 +225,18 @@ function insertBlockTexEditor(index, latex){
     let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
 
 
-    debugger
+     
 }
 
 function insertInlineTexEditor(index, latex){
-    // debugger;
-    let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
+    //  ;
+    let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
+    configureACEEditor(node_wrappernode, latex, true)
 
-    debugger
+
+    // debugger;
     editor.focus()
+
 
     // let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
 
@@ -241,6 +258,35 @@ function replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
 
     // TODO this wouldn't be an insert text. It should be an insertEmbed
     insertBlockTexEditor(begin, formula)
+
+    // == =========
+    // set cursor position to be the beginning of the math editor
+    // TODO
+    // quill.setSelection(begin+1)
+
+
+    node.remove()
+    let formulaHTML = MathJax.tex2svg(formula);
+    tooltip.show()
+
+    tooltip.root.innerHTML = `
+                <span class="ql-tooltip-arrow"></span>
+                ${formulaHTML.outerHTML}
+            `;
+}
+
+
+// TODO
+function replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
+    //  ;
+    let node = mathnode
+    let begin = quill.getIndex(node.__blot.blot)
+    let formula = node.getAttribute('latex')
+
+    //  ;
+
+    // TODO this wouldn't be an insert text. It should be an insertEmbed
+    insertInlineTexEditor(begin, formula)
 
     // == =========
     // set cursor position to be the beginning of the math editor
@@ -324,9 +370,12 @@ class TweetBlot extends TexEditorBlot(InlineEmbed) { // supposed to be inline ..
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
         node.addEventListener('mouseup',
-            MathNodeMouseUpHandler(node, {
-                'inlinetex': true
-            })
+
+            ()=>{replaceInlineMathWithInlineEdit(node, quill)}
+
+            // MathNodeMouseUpHandler(node, {
+            //     'inlinetex': true
+            // })
         )
 
         return node;
@@ -467,7 +516,7 @@ class MathEditorModule {
         let blotOld = getBlot(oldRange.index)
         let blotNew = getBlot(range.index)
         let isBlockTex = (blot) => {
-            // debugger;
+            //  ;
             return blot.statics.blotName === blockTexEditorClassName
             // return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
         }
@@ -484,10 +533,10 @@ class MathEditorModule {
         ) {
             // let wasInline = isInlineTex(blotOld)
             console.log("you exited inline or block tex.", blotOld)
-            // debugger;
+            //  ;
             let editor = blotOld.domNode.env.editor;
             let formula = editor.getValue()
-            // debugger;
+            //  ;
             let begin = quill.getIndex(blotOld);
             let count = 1
             quill.deleteText(begin, count, 'silent')
@@ -514,7 +563,7 @@ class EnterHandlerClass {
         this.tooltip = tooltip;
     }
 
-    static getConvertEditorToMathHandler(enterHandler){
+    static getConvertEditorToMathHandler(enterHandler, isInline = false){
         let _ = enterHandler;
         /**
          *
@@ -538,7 +587,8 @@ class EnterHandlerClass {
             quill.deleteText(indexOfEditor, 1)
 
             //  ;
-            quill.insertEmbed(indexOfEditor, "mathbox-block", formula, "silent");
+            // debugger
+            quill.insertEmbed(indexOfEditor, isInline ? "mathbox-inline" : "mathbox-block", formula, "silent");
             tooltip.hide()
         }
         return f
@@ -613,7 +663,7 @@ class EnterHandlerClass {
                     if(lastTwo === '$$'){
 
                         if(offset === 2){
-                            // debugger
+                            //  
                             // quill.format('code-block', true)
                             quill.deleteText(index-2, 2)
                             insertBlockTexEditor(index-2, "")
@@ -740,7 +790,7 @@ class EnterHandlerClass {
 class InlineTexEditor extends InlineEmbed {
     static create(value = ""){
 
-        debugger;
+        //  ;
         let node = super.create();
         var node_wrappernode = document.createElement("div")
 
@@ -755,7 +805,9 @@ class InlineTexEditor extends InlineEmbed {
         node_wrappernode.style.display = "inline-block"
         node_wrappernode.style["vertical-align"] = "middle";
         node_wrappernode.style.width = "1px"; // default width
-        configureACEEditor(node_wrappernode, "", true)
+
+        window.node_wrappernode = node_wrappernode
+        // configureACEEditor(node_wrappernode, value, true) // im gonna try to call this outside
 
 
 
