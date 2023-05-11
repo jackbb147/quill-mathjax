@@ -54,13 +54,16 @@ function updateSize(e, renderer, numChars) {
     var text = renderer.session.getLine(0);
     var chars = renderer.session.$getStringScreenWidth(text)[0];
 
-    var width = Math.max(chars, 2) * (numChars || renderer.characterWidth) // text size
+    // if(renderer.characterWidth === 0) debugger;
+    var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
         + 2 * renderer.$padding // padding
         + 2 // little extra for the cursor
         + 0 // add border width if needed
 
     // update container size
-    debugger
+
+    // debugger
+    // console.log("hey")
     renderer.container.style.width = width + "px";
     // update computed size stored by the editor
     renderer.onResize(false, 0, width, renderer.$size.height);
@@ -71,16 +74,18 @@ function updateSize(e, renderer, numChars) {
  * @param isInline {Boolean}
  */
 function configureACEEditor(node, formula, isInline = false){
+    debugger;
+
     //
     // var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
     var editorNode = node
     var editor = ace.edit(editorNode);
     var langTools = ace.require("ace/ext/language_tools");
-    editor.focus()
+    // editor.focus()
     editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/latex");
-
+    editor.focus()
     var staticWordCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
             // var wordList = [String.raw `\foo`, "bar", "baz"];
@@ -101,13 +106,23 @@ function configureACEEditor(node, formula, isInline = false){
         enableBasicAutocompletion: true,
         enableSnippets: true,
         enableLiveAutocompletion: true,
-        maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+        maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+
+        // fontSize: EDITOR_CONTAINER_FONTSIZE
+
     });
+
+    // debugger
+
+    editor.setFontSize(15)
+    editor.renderer.updateCharacterSize()
+
+    // debugger;
     // editor.setAutoScrollEditorIntoView(true);
 
     editor.completers.push(staticWordCompleter)
 
-    editor.setValue(formula)
+
     window.editor = editor;
 
     editor.commands.addCommand({
@@ -127,6 +142,7 @@ function configureACEEditor(node, formula, isInline = false){
         // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
         // let blot = quill.getLeaf(begin)
 
+        debugger
 
         let formula = editor.getValue()
         //  ;
@@ -157,8 +173,11 @@ function configureACEEditor(node, formula, isInline = false){
         let typesetted = MathJax.tex2svg(formula);
         tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
+        debugger;
         if(isInline){
+
             updateSize(null, editor.renderer)
+            editor.focus()
             // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
         }
 
@@ -167,10 +186,14 @@ function configureACEEditor(node, formula, isInline = false){
 
     if(isInline){
         // debugger;
-
+        // debugger
+        // editor.renderer.updateCharacterSize()
         updateSize(null, editor.renderer, formula.length)
-
+        // editor.setValue(formula)
+        editor.setValue("")
     }
+
+
 
     return editor;
 }
@@ -184,25 +207,27 @@ function insertBlockTexEditor(index, latex){
     // quill.insertText(begin, formula, attr)
     let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
 
-
-
     // == ========= editor stuff
     let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
 
 
+    debugger
 }
 
 function insertInlineTexEditor(index, latex){
     // debugger;
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
+
+    debugger
+    editor.focus()
+
     // let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
 
-
-
-
+    // quill.setSelection(index +1)
+    // console.log(quill.getSelection().index, quill.getLeaf(quill.getSelection().index))
 
     // == ========= editor stuff
-    // let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassNam
+
 }
 
 
@@ -714,6 +739,8 @@ class EnterHandlerClass {
 }
 class InlineTexEditor extends InlineEmbed {
     static create(value = ""){
+
+        debugger;
         let node = super.create();
         var node_wrappernode = document.createElement("div")
 
@@ -724,7 +751,11 @@ class InlineTexEditor extends InlineEmbed {
         node.setAttribute("latex", value)
         node.setAttribute("isInlineTexEditor", true)
         node.style.display = "inline" // todo moe this to a css file
-        configureACEEditor(node_wrappernode, "\\sum", true)
+
+        node_wrappernode.style.display = "inline-block"
+        node_wrappernode.style["vertical-align"] = "middle";
+        node_wrappernode.style.width = "1px"; // default width
+        configureACEEditor(node_wrappernode, "", true)
 
 
 

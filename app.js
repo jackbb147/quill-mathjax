@@ -109,6 +109,7 @@ $('#tweet-button').click(function() {
 
     let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
     // quill.insertText(range.index, ' ', {"inlinetex": true})
+    debugger
     insertInlineTexEditor(range.index, defaultText)
     // quill.insertEmbed(range.index + 1, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
     // quill.setSelection(range.index + 1, Quill.sources.SILENT);
@@ -129,38 +130,15 @@ $('#divider-button').click(function() {
     let blockTexEditorClassName = "blocktexeditor"
     // quill.format("blockwrapper", true) //todo
     quill.insertEmbed(range.index + 1, blockTexEditorClassName, true, Quill.sources.USER);
-    quill.setSelection(range.index + 1, Quill.sources.SILENT);
+    // quill.setSelection(range.index + 1, Quill.sources.SILENT);
 
 
     // TODO refactor this somewhere else!
     let node = document.getElementsByClassName(blockTexEditorClassName)[0]
-
-    console.assert(window.configureACEEditor)
+    //
+    // console.assert(window.configureACEEditor)
     window.configureACEEditor(node, latex)
-    // var editor = ace.edit(node);
-    // var langTools = ace.require("ace/ext/language_tools");
-    //
-    // editor.setTheme("ace/theme/monokai");
-    // editor.session.setMode("ace/mode/latex");
-    // editor.setOptions({
-    //     enableBasicAutocompletion: true,
-    //     enableSnippets: true,
-    //     enableLiveAutocompletion: true,
-    //     maxLines: 40 //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
-    // });
-    // // editor.setAutoScrollEditorIntoView(true);
-    //
-    // window.editor = editor;
-    //
-    // editor.commands.addCommand({
-    //     name: 'myCommand',
-    //     // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
-    //     bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-    //     exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
-    //     readOnly: true, // false if this command should not apply in readOnly mode
-    //     // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
-    //     // scrollIntoView: "cursor", control how cursor is scolled into view after the command
-    // });
+
 });
 
 

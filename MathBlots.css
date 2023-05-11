@@ -18,6 +18,8 @@
 }
 
 .inline-editor-wrapper{
-    display: inline-block;
-    vertical-align: middle;
+    /*display: inline-block;*/
+    /*vertical-align: middle;*/
+
+    /*width: 1px; !*default width*!*/
 }
