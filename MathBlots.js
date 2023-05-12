@@ -230,13 +230,17 @@ function insertBlockTexEditor(index, latex){
 
 function insertInlineTexEditor(index, latex){
     //  ;
-    debugger
+    // debugger
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
     configureACEEditor(node_wrappernode, latex, true)
 
 
-    editor.focus()
-
+    // editor.focus()
+    //  for some reason this must be done in order to avoid cursor being
+    //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
+    setTimeout(function() {
+        editor.focus()
+    }, 0);
 }
 
 
@@ -712,7 +716,7 @@ class EnterHandlerClass {
                     quill.once('text-change', (delta, oldDelta, source)=>{
                         console.log("hey!")
                         console.log(delta, oldDelta, source)
-
+                        // debugger
                         let ops1 = delta.ops[1]; // todo change this name...
 
                         if(ops1.hasOwnProperty("insert")){
@@ -721,9 +725,11 @@ class EnterHandlerClass {
 
                             // debugger;
                             quill.deleteText(index, 3)
-                            // debugger
-                            insertInlineTexEditor(index, formula)
-                            quill.setSelection(index+1)
+                            debugger
+                            insertInlineTexEditor(index, " ")
+
+
+                            // quill.setSelection(index+1)
                             // return false
 
                             // let text =  ' ' + ops1.insert;

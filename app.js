@@ -105,7 +105,7 @@ $('#tweet-button').click(function() {
     // let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
     // quill.insertText(range.index, ' ', {"inlinetex": true})
 
-    let defaultText=  ""
+    let defaultText=  " "
      
     insertInlineTexEditor(range.index, defaultText)
     // quill.insertEmbed(range.index + 1, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
