@@ -95,11 +95,6 @@ setFontSize()
 
 
 
-
-
-
-
-
 /**
  * For inline math edit
  */
@@ -107,10 +102,10 @@ $('#tweet-button').click(function() {
     let range = quill.getSelection(true);
     let latex = String.raw `\int f(x)dx = F(x)+C`;
 
-    let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
+    // let defaultText = String.raw `\vec{F} = m\vec{a}` // use this for debugging..
     // quill.insertText(range.index, ' ', {"inlinetex": true})
 
-    // let defaultText=  ""
+    let defaultText=  ""
      
     insertInlineTexEditor(range.index, defaultText)
     // quill.insertEmbed(range.index + 1, INLINE_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);

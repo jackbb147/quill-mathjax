@@ -230,20 +230,12 @@ function insertBlockTexEditor(index, latex){
 
 function insertInlineTexEditor(index, latex){
     //  ;
+    debugger
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
     configureACEEditor(node_wrappernode, latex, true)
 
 
-    // debugger;
     editor.focus()
-
-
-    // let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
-
-    // quill.setSelection(index +1)
-    // console.log(quill.getSelection().index, quill.getLeaf(quill.getSelection().index))
-
-    // == ========= editor stuff
 
 }
 
@@ -724,7 +716,16 @@ class EnterHandlerClass {
                         let ops1 = delta.ops[1]; // todo change this name...
 
                         if(ops1.hasOwnProperty("insert")){
-                            alert("hey! you wanna edit latex?")
+                            let formula = ops1.insert
+                            // alert("hey! you wanna edit latex?")
+
+                            // debugger;
+                            quill.deleteText(index, 3)
+                            // debugger
+                            insertInlineTexEditor(index, formula)
+                            quill.setSelection(index+1)
+                            // return false
+
                             // let text =  ' ' + ops1.insert;
                             // quill.deleteText(index, 2 + text.length)
                             // //  ;
@@ -735,6 +736,8 @@ class EnterHandlerClass {
                             quill.deleteText(index, 1)
                         }
                     })
+
+
                 }
             },
             // startInlineMathEdit: {
