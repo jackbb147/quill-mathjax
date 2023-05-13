@@ -188,36 +188,42 @@ class MyToolTip extends Tooltip {
 class MathEditorModule {
     constructor(quill, options) {
 
-        if (!options.hasOwnProperty('enterHandler')) {
-            throw new Error('No enterHandler supplied. ')
+        if (options.hasOwnProperty('enterHandler')) {
+            throw new Error('Extra Enter handler supplied. ')
         }
         this.quill = quill;
         this.options = options;
-        this.clicked = null; // a dom node
-        this.clickedInlineTexEditor = false // whether the domNode is an inline tex editor
-        this.lastClickedIndex  = null;  //index of the last clicked item
+        this.lastClicked = {
+            domNode: null,
+            index: null,
+            isInlineTexEditor: null
+        }
+        this.enterHandler = new EnterHandlerClass(this);
+
         quill.root.addEventListener("click", ev => {
             // debugger
             let clicked = ev.target, lastClicked = this.clicked
             let isInlineTexEditor = isInlineTexEditBlot(clicked);
-            if(!isInlineTexEditor && this.clickedInlineTexEditor){
+            if(!isInlineTexEditor && this.lastClicked.isInlineTexEditor){
                 // User is clicking away from an inline tex editor...
-                // debugger;
-                let editor = getACEEditorInstance(lastClicked)
+                debugger;
+                let editor = getACEEditorInstance(this.lastClicked.domNode)
                 let formula = editor.getValue()
                 //  ;
-                let begin = this.lastClickedIndex
+                let begin = this.lastClicked.index
                 let count = 1
                 quill.deleteText(begin, count, 'silent')
                 quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
                 tooltip.hide()
             }
 
-            // debugger
+
             // update
-            this.clicked = clicked
-            this.clickedInlineTexEditor = isInlineTexEditor
-            this.lastClickedIndex = quill.getSelection().index
+            this.lastClicked = {
+                index: quill.getSelection().index,
+                domNode: ev.target,
+                isInlineTexEditor
+            }
         })
         // TODO some refactoring needed..
         quill.on('selection-change', this.handleSelectionChange.bind(this))
@@ -261,6 +267,21 @@ class MathEditorModule {
     }
 
 
+    action(type, param){
+        switch(type){
+            case "setIndex":
+                // TODO
+                this.lastClicked = {
+                    index: param.index,
+                //     TODO dom node and isInlineTexEditor...
+                }
+                break;
+        }
+    }
+
+
+
+
     /**
      * insert an ACE editor at the specified index.
      * @param index
@@ -273,9 +294,16 @@ class MathEditorModule {
         let editor = MathEditorModule.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
     }
 
+    //
+
+    // helper method that returns the leaf blot at the NEXT index.
+    static leaf(index){
+        return quill.getLeaf(index + 1)[0];
+    }
+
     static insertInlineTexEditor(index, latex){
         //  ;
-        let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
+        let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, 'api');
         MathEditorModule.configureACEEditor(node_wrappernode, latex, true)
 
         //  for some reason this must be done in order to avoid cursor being
@@ -559,10 +587,13 @@ class MathEditorModule {
     handleSelectionChange(range, oldRange, source) {
         //  ;
 
+        // debugger;
         // console.log("hey! ", range, oldRange, source)
         if (source !== 'user' || !range || !oldRange) return;
-        let blotOld = getBlot(oldRange.index)
+        // let blotOld = getBlot(oldRange.index)
+        let blotOld = MathEditorModule.leaf(oldRange.index)
         let blotNew = getBlot(range.index)
+
         let isBlockTex = (blot) => {
             //  ;
             return blot.statics.blotName === BLOCK_TEX_EDITOR_CLASSNAME
@@ -594,7 +625,17 @@ class MathEditorModule {
             tooltip.hide()
 
         }else if ((isInlineTex(blotOld) && !isInlineTex(blotNew))){
-            alert("hey!")
+            // alert("hey!")
+            // debugger;
+            // let editor = getACEEditorInstance(blotOld.domNode.children[0].children[0])
+            // let formula = editor.getValue()
+            // //  ;
+            // let begin = quill.getIndex(blotOld);
+            // let count = 1
+            //
+            // quill.deleteText(begin, count, 'silent')
+            // quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
+            // tooltip.hide()
         }
         // console.log(blotOld, oldRange.index, blotNew, range.index, source)
 
@@ -603,8 +644,8 @@ class MathEditorModule {
 
 
 class EnterHandlerClass {
-    constructor() {
-
+    constructor(matheditormodule) {
+        this.mathEditorModule = matheditormodule;
     }
 
     setQuillInstance(quill) {
@@ -778,24 +819,11 @@ class EnterHandlerClass {
                         if(ops1.hasOwnProperty("insert")){
                             let formula = ops1.insert
                             // alert("hey! you wanna edit latex?")
-
-                            // debugger;
-                            quill.deleteText(index, 3)
-                            // debugger
+                            quill.deleteText(index, 3, 'api')
                             MathEditorModule.insertInlineTexEditor(index, formula)
-
-
-                            // quill.setSelection(index+1)
-                            // return false
-
-                            // let text =  ' ' + ops1.insert;
-                            // quill.deleteText(index, 2 + text.length)
-                            // //  ;
-                            // quill.insertText(index, text, {'inlinetex': true})
-                            // quill.setSelection(index+2)
                         }else if(ops1.hasOwnProperty("delete")){
                             console.log("hey! you dont wanna edit latex anymore?")
-                            quill.deleteText(index, 1)
+                            quill.deleteText(index, 1, 'api')
                         }
                     })
 
