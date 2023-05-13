@@ -232,6 +232,8 @@ function insertInlineTexEditor(index, latex){
     //  ;
     // debugger
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
+    // alert("hey!")
+    // debugger;
     configureACEEditor(node_wrappernode, latex, true)
 
 
@@ -239,6 +241,7 @@ function insertInlineTexEditor(index, latex){
     //  for some reason this must be done in order to avoid cursor being
     //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
     setTimeout(function() {
+        // editor.setValue("")
         editor.focus()
     }, 0);
 }
@@ -725,8 +728,8 @@ class EnterHandlerClass {
 
                             // debugger;
                             quill.deleteText(index, 3)
-                            debugger
-                            insertInlineTexEditor(index, " ")
+                            // debugger
+                            insertInlineTexEditor(index, formula)
 
 
                             // quill.setSelection(index+1)
