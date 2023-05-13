@@ -2,7 +2,7 @@ const FORMAT_BLOCKTEXEDIT = "blockwrapper"
 const BLOCK_TEX_EDITOR_CLASSNAME = "blocktexeditor" //todo change this variable name
 const INLINE_TEX_EDITOR_CLASSNAME = "inlinetexeditor"
 const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE MUST BE KEPT IN SYNC WITH ACE'S EDITOR FONT SIZE, OTHERWISE TOOLTIP POSITIONING WILL BE OFF
-
+const Scroll = Quill.import("blots/scroll")
 /**
  * How to use:
  *
@@ -42,8 +42,46 @@ function getBlot(index) {
     return quill.getLeaf(index)[0]
 }
 
+function getACEEditorInstance(domNode){
+//     TODO
+//     debugger
+    var x = domNode
+    while(!x.env || !x.env.editor){
+        x = x.parentNode
+    }
+
+    return x.env.editor
+
+}
+
+
 window.getBlot = getBlot
 
+// returns true if the given node is an inlineTexEdit blot; false otherwise.
+function isInlineTexEditBlot(domNode){
+//     TODO
+//     debugger;
+    try{
+        let x = domNode
+        let blot = Quill.find(x)
+        while( ! (blot instanceof Scroll) && x.parentNode){
+            if(blot instanceof InlineTexEditor) return true
+            x = x.parentNode;
+            blot =  Quill.find(x)
+            if(!x || !x.parentNode) throw {
+                error: "x or x.parentNode is bad. ",
+                x,
+                parentNode: x.parentNode,
+                blot
+            }
+        }
+        return false
+    }catch(e){
+        throw {
+            caughtError: e
+        }
+    }
+}
 
 
 
@@ -155,7 +193,32 @@ class MathEditorModule {
         }
         this.quill = quill;
         this.options = options;
+        this.clicked = null; // a dom node
+        this.clickedInlineTexEditor = false // whether the domNode is an inline tex editor
+        this.lastClickedIndex  = null;  //index of the last clicked item
+        quill.root.addEventListener("click", ev => {
+            // debugger
+            let clicked = ev.target, lastClicked = this.clicked
+            let isInlineTexEditor = isInlineTexEditBlot(clicked);
+            if(!isInlineTexEditor && this.clickedInlineTexEditor){
+                // User is clicking away from an inline tex editor...
+                // debugger;
+                let editor = getACEEditorInstance(lastClicked)
+                let formula = editor.getValue()
+                //  ;
+                let begin = this.lastClickedIndex
+                let count = 1
+                quill.deleteText(begin, count, 'silent')
+                quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
+                tooltip.hide()
+            }
 
+            // debugger
+            // update
+            this.clicked = clicked
+            this.clickedInlineTexEditor = isInlineTexEditor
+            this.lastClickedIndex = quill.getSelection().index
+        })
         // TODO some refactoring needed..
         quill.on('selection-change', this.handleSelectionChange.bind(this))
         quill.on("text-change", this.handleTextChange.bind(this))
@@ -503,12 +566,14 @@ class MathEditorModule {
         let isBlockTex = (blot) => {
             //  ;
             return blot.statics.blotName === BLOCK_TEX_EDITOR_CLASSNAME
-            // return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
+
         }
 
         let isInlineTex = blot => {
-            // return blot.statics.blotName ===
+            return blot.statics.blotName === INLINE_TEX_EDITOR_CLASSNAME
         }
+
+        // debugger
         console.log("hey! ", isBlockTex(blotOld),  isBlockTex(blotNew) )
         //  ;
 
@@ -528,6 +593,8 @@ class MathEditorModule {
             quill.insertEmbed(begin,  'mathbox-block', formula, Quill.sources.USER);
             tooltip.hide()
 
+        }else if ((isInlineTex(blotOld) && !isInlineTex(blotNew))){
+            alert("hey!")
         }
         // console.log(blotOld, oldRange.index, blotNew, range.index, source)
 
