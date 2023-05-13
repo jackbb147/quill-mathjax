@@ -55,7 +55,6 @@ Quill.register(BlockTexEditor)
 Quill.register(InlineTexEditor)
 Quill.register(BlockWrapper)
 
-Quill.register(InlineTex)
 Quill.register(BoldBlot);
 Quill.register(ItalicBlot);
 Quill.register(LinkBlot);

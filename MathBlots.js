@@ -8,7 +8,6 @@ const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE M
  *
  * Quill.register(Block)
  * Quill.register(BlockMathDisplay)
- * Quill.register(InlineTex)
  * Quill.register(InlineMathDisplay);
  * Quill.register('modules/MathEditorModule', MathEditorModule)
  * let enterHandler = new EnterHandlerClass();
@@ -31,9 +30,6 @@ let BlockEmbed = Quill.import('blots/block/embed');
 let InlineEmbed = Quill.import('blots/embed')
 let SyntaxCodeBlock = Quill.import('modules/syntax')
 const Tooltip = Quill.import('ui/tooltip');
-// const Emitter = Quill.import("emi")
-
-console.log(SyntaxCodeBlock)
 
 window.SyntaxCodeBlock = SyntaxCodeBlock
 window.Block = Block;
@@ -362,23 +358,15 @@ BlockMathDisplay.blotName = 'mathbox-block'
 // TODO change the name of this ...
 class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
     static create(latex) {
-
         let node = super.create(latex, true);
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
         node.addEventListener('mouseup',
-
             ()=>{replaceInlineMathWithInlineEdit(node, quill)}
-
-            // MathNodeMouseUpHandler(node, {
-            //     'inlinetex': true
-            // })
         )
-
         return node;
     }
-
 }
 
 InlineMathDisplay.blotName = 'mathbox-inline';
@@ -386,13 +374,8 @@ InlineMathDisplay.tagName = 'div';
 InlineMathDisplay.className = 'mathbox-inline';
 
 
-class InlineTex extends Inline {
+// TODO remove this ...
 
-}
-
-InlineTex.blotName = 'inlinetex'
-InlineTex.tagName = 'code'
-InlineTex.className = 'inlinetex'
 class MyToolTip extends Tooltip {
     constructor(quill, bounds) {
         super(quill, bounds);
@@ -519,9 +502,7 @@ class MathEditorModule {
             // return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
         }
 
-        let isInlineTex = blot => {
-            return blot.parent instanceof InlineTex
-        }
+
         console.log("hey! ", isBlockTex(blotOld),  isBlockTex(blotNew) )
         //  ;
 
@@ -879,10 +860,6 @@ BlockTexEditor.className = blockTexEditorClassName
 
 
 
-
-
-
-
 class BlockWrapper extends Block {
 
 }
@@ -894,13 +871,8 @@ BlockWrapper.className = 'blockwrapper'
 // TODO probably need to get rid of these global-namespaced variables...
 window.BlockWrapper = BlockWrapper
 window.BlockTexEditor = BlockTexEditor
-window.TweetBlot = InlineMathDisplay
-window.InlineTex = InlineTex
-window.BlockMath = BlockMathDisplay
+window.InlineMathDisplay = InlineMathDisplay
+window.BlockMathDisplay = BlockMathDisplay
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-
-
 window.EnterHandlerClass = EnterHandlerClass
-
-
