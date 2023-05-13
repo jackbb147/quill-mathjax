@@ -1,5 +1,5 @@
 const FORMAT_BLOCKTEXEDIT = "blockwrapper"
-const blockTexEditorClassName = "blocktexeditor" //todo change this variable name
+const BLOCK_TEX_EDITOR_CLASSNAME = "blocktexeditor" //todo change this variable name
 const INLINE_TEX_EDITOR_CLASSNAME = "inlinetexeditor"
 const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE MUST BE KEPT IN SYNC WITH ACE'S EDITOR FONT SIZE, OTHERWISE TOOLTIP POSITIONING WILL BE OFF
 
@@ -44,254 +44,6 @@ function getBlot(index) {
 
 window.getBlot = getBlot
 
-// for inline ace editor auto resizing
-// numChars: number of characters. If undefined, use renderer.characterWidth
-function updateSize(e, renderer, numChars) {
-    // debugger
-    var text = renderer.session.getLine(0);
-    var chars = renderer.session.$getStringScreenWidth(text)[0];
-
-    // if(renderer.characterWidth === 0) debugger;
-    // if(renderer.characterWidth != 0) debugger;
-    // if(renderer.characterWidth === 0)  ;
-    var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
-        + 2 * renderer.$padding // padding
-        + 2 // little extra for the cursor
-        + 0 // add border width if needed
-
-    // update container size
-
-    //  
-    // console.log("hey")
-    renderer.container.style.width = width + "px";
-    // update computed size stored by the editor
-    renderer.onResize(false, 0, width, renderer.$size.height);
-}
-/**
- * TODO refactor this ...
- * @param formula
- * @param isInline {Boolean}
- */
-function configureACEEditor(node, formula="", isInline = false){
-    //  ;
-
-    //
-    // var editorNode = document.getElementsByClassName(blockTexEditorClassName)[0]
-    var editorNode = node
-
-    // debugger
-    var editor = ace.edit(editorNode);
-    var langTools = ace.require("ace/ext/language_tools");
-    // editor.focus()
-    editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
-    editor.setTheme("ace/theme/monokai");
-    editor.session.setMode("ace/mode/latex");
-    editor.focus()
-    var staticWordCompleter = {
-        getCompletions: function(editor, session, pos, prefix, callback) {
-            // var wordList = [String.raw `\foo`, "bar", "baz"];
-            var wordList  = MATHJAXCOMMANDS
-            callback(null, wordList.map(function(word) {
-                return {
-                    caption: word,
-                    value: word,
-                    meta: "static"
-                };
-            }));
-
-        }
-    }
-
-    editor.setOptions({
-        showGutter: !isInline,
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true,
-        maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
-
-        // fontSize: EDITOR_CONTAINER_FONTSIZE
-
-    });
-
-    //  
-
-    editor.setFontSize(15)
-    editor.renderer.updateCharacterSize()
-
-    //  ;
-    // editor.setAutoScrollEditorIntoView(true);
-
-    editor.completers.push(staticWordCompleter)
-
-
-    window.editor = editor;
-
-    editor.commands.addCommand({
-        name: 'myCommand',
-        // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
-        bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
-        // TODO modify this for inline
-        exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler, isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
-        readOnly: true, // false if this command should not apply in readOnly mode
-        // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
-        // scrollIntoView: "cursor", control how cursor is scolled into view after the command
-    });
-
-    editor.session.on("change", (delta)=>{
-        let quill = window.quill;
-        //  ;
-        // let isInline = blotName === 'inlinetex'
-        //  ;
-        // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-        // let blot = quill.getLeaf(begin)
-
-        //  
-        // debugger;
-        let formula = editor.getValue()
-        //  ;
-
-        tooltip.show() //todo refactor this
-
-        // if (!isInline) {
-            // tooltip.root.style.width = "100%"
-        tooltip.root.classList.add('fullwidth')
-
-        //  ;
-        // TODO  =========
-        let bounds = quill.getBounds(
-            formula.length + quill.getSelection().index
-        );
-        //  ;
-        console.log(bounds)
-        formula = String.raw`
-                    \displaylines{ ${formula} }
-                `
-
-        console.log(formula)
-
-
-        tooltip.root.style.top = `${bounds.bottom}px`;
-        // =============
-        tooltip.root.style.left = `0px`;
-        let typesetted = MathJax.tex2svg(formula);
-        tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
-
-        //  ;
-        if(isInline){
-
-            updateSize(null, editor.renderer)
-            editor.focus()
-            // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
-        }
-
-
-    })
-
-
-    // debugger
-    // editor.setValue(formula)
-    editor.insert(formula)
-
-
-    // if(isInline){
-    //     //  ;
-    //     //
-    //     // editor.renderer.updateCharacterSize()
-    //     updateSize(null, editor.renderer, formula.length)
-    //     // editor.setValue(formula)
-    //
-    // }
-
-
-
-
-    return editor;
-}
-
-/**
- * insert an ACE editor at the specified index.
- * @param index
- * @param latex the default text input to feed into the editor
- */
-function insertBlockTexEditor(index, latex){
-    // quill.insertText(begin, formula, attr)
-    let res = quill.insertEmbed(index, blockTexEditorClassName, true, Quill.sources.USER);
-
-    // == ========= editor stuff
-    let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
-
-}
-
-function insertInlineTexEditor(index, latex){
-    //  ;
-    let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
-    configureACEEditor(node_wrappernode, latex, true)
-
-    //  for some reason this must be done in order to avoid cursor being
-    //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
-    setTimeout(function() {
-        // editor.setValue("")
-        editor.focus()
-    }, 0);
-}
-
-
-function replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
-    //  ;
-    let node = blockMathNode
-    let begin = quill.getIndex(node.__blot.blot)
-    let formula = node.getAttribute('latex')
-
-    //  ;
-
-    // TODO this wouldn't be an insert text. It should be an insertEmbed
-    insertBlockTexEditor(begin, formula)
-
-    // == =========
-    // set cursor position to be the beginning of the math editor
-    // TODO
-    // quill.setSelection(begin+1)
-
-
-    node.remove()
-    let formulaHTML = MathJax.tex2svg(formula);
-    tooltip.show()
-
-    tooltip.root.innerHTML = `
-                <span class="ql-tooltip-arrow"></span>
-                ${formulaHTML.outerHTML}
-            `;
-}
-
-
-// TODO
-function replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
-    //  ;
-    let node = mathnode
-    let begin = quill.getIndex(node.__blot.blot)
-    let formula = node.getAttribute('latex')
-
-    //  ;
-
-    // TODO this wouldn't be an insert text. It should be an insertEmbed
-    insertInlineTexEditor(begin, formula)
-
-    // == =========
-    // set cursor position to be the beginning of the math editor
-    // TODO
-    // quill.setSelection(begin+1)
-
-
-    node.remove()
-    let formulaHTML = MathJax.tex2svg(formula);
-    tooltip.show()
-
-    tooltip.root.innerHTML = `
-                <span class="ql-tooltip-arrow"></span>
-                ${formulaHTML.outerHTML}
-            `;
-}
-
 
 
 
@@ -325,6 +77,11 @@ let MathDisplayBlot = Base => class extends Base {
 
 // TODO
 class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
+    static tagName = 'div'
+    static className = 'mathbox-block'
+    static blotName = 'mathbox-block'
+
+
     static create(latex) {
         //TODO
         let node = super.create(latex)
@@ -344,52 +101,50 @@ class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
      */
     static MouseUpHandler(node, attr) {
         return (e) => {
-            replaceBlockMathWithBlockEdit(node, quill, attr)
+            MathEditorModule.replaceBlockMathWithBlockEdit(node, quill, attr)
         }
     }
 
 }
 
-BlockMathDisplay.tagName = 'div'
-BlockMathDisplay.className = 'mathbox-block'
-BlockMathDisplay.blotName = 'mathbox-block'
-
 
 // TODO change the name of this ...
 class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
+    static blotName = 'mathbox-inline';
+    static tagName = 'div';
+    static className = 'mathbox-inline';
     static create(latex) {
         let node = super.create(latex, true);
         let mathNode = node.firstChild;
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
         node.addEventListener('mouseup',
-            ()=>{replaceInlineMathWithInlineEdit(node, quill)}
+            ()=>{MathEditorModule.replaceInlineMathWithInlineEdit(node, quill)}
         )
         return node;
     }
 }
 
-InlineMathDisplay.blotName = 'mathbox-inline';
-InlineMathDisplay.tagName = 'div';
-InlineMathDisplay.className = 'mathbox-inline';
+
 
 
 // TODO remove this ...
 
 class MyToolTip extends Tooltip {
+    // This is the innerHTML of the tooltip
+// https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
+    static TEMPLATE = `
+<!--<span>hello</span>-->
+<div class="ql-tooltip-arrow"></div>
+<span>A template: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
+`
+
     constructor(quill, bounds) {
         super(quill, bounds);
     }
 }
 
 
-// This is the innerHTML of the tooltip
-// https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
-MyToolTip.TEMPLATE = `
-<!--<span>hello</span>-->
-<div class="ql-tooltip-arrow"></div>
-<span>A template: ${MathJax.tex2svg('\\int \\mathcal{E}').outerHTML}</span>
-`
 
 
 class MathEditorModule {
@@ -418,7 +173,256 @@ class MathEditorModule {
         enterHandler.setTooltipInstance(tooltip)
 
     }
+// for inline ace editor auto resizing
+// numChars: number of characters. If undefined, use renderer.characterWidth
+    static updateSize(e, renderer, numChars) {
+        // debugger
+        var text = renderer.session.getLine(0);
+        var chars = renderer.session.$getStringScreenWidth(text)[0];
 
+        // if(renderer.characterWidth === 0) debugger;
+        // if(renderer.characterWidth != 0) debugger;
+        // if(renderer.characterWidth === 0)  ;
+        var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
+            + 2 * renderer.$padding // padding
+            + 2 // little extra for the cursor
+            + 0 // add border width if needed
+
+        // update container size
+
+        //
+        // console.log("hey")
+        renderer.container.style.width = width + "px";
+        // update computed size stored by the editor
+        renderer.onResize(false, 0, width, renderer.$size.height);
+    }
+
+
+    /**
+     * insert an ACE editor at the specified index.
+     * @param index
+     * @param latex the default text input to feed into the editor
+     */
+    static insertBlockTexEditor(index, latex){
+        // quill.insertText(begin, formula, attr)
+        let res = quill.insertEmbed(index, BLOCK_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
+        // == ========= editor stuff
+        let editor = MathEditorModule.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
+    }
+
+    static insertInlineTexEditor(index, latex){
+        //  ;
+        let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
+        MathEditorModule.configureACEEditor(node_wrappernode, latex, true)
+
+        //  for some reason this must be done in order to avoid cursor being
+        //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
+        setTimeout(function() {
+            // editor.setValue("")
+            editor.focus()
+        }, 0);
+    }
+
+
+
+
+    /**
+     * TODO refactor this ...
+     * @param formula
+     * @param isInline {Boolean}
+     */
+    static configureACEEditor(node, formula="", isInline = false){
+        //  ;
+
+        //
+        // var editorNode = document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0]
+        var editorNode = node
+
+        // debugger
+        var editor = ace.edit(editorNode);
+        var langTools = ace.require("ace/ext/language_tools");
+        // editor.focus()
+        editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/latex");
+        editor.focus()
+        var staticWordCompleter = {
+            getCompletions: function(editor, session, pos, prefix, callback) {
+                // var wordList = [String.raw `\foo`, "bar", "baz"];
+                var wordList  = MATHJAXCOMMANDS
+                callback(null, wordList.map(function(word) {
+                    return {
+                        caption: word,
+                        value: word,
+                        meta: "static"
+                    };
+                }));
+
+            }
+        }
+
+        editor.setOptions({
+            showGutter: !isInline,
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+
+            // fontSize: EDITOR_CONTAINER_FONTSIZE
+
+        });
+
+        //
+
+        editor.setFontSize(15)
+        editor.renderer.updateCharacterSize()
+
+        //  ;
+        // editor.setAutoScrollEditorIntoView(true);
+
+        editor.completers.push(staticWordCompleter)
+
+
+        window.editor = editor;
+
+        editor.commands.addCommand({
+            name: 'myCommand',
+            // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+            bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+            // TODO modify this for inline
+            exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler, isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+            readOnly: true, // false if this command should not apply in readOnly mode
+            // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+            // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+        });
+
+        editor.session.on("change", (delta)=>{
+            let quill = window.quill;
+            //  ;
+            // let isInline = blotName === 'inlinetex'
+            //  ;
+            // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
+            // let blot = quill.getLeaf(begin)
+
+            //
+            // debugger;
+            let formula = editor.getValue()
+            //  ;
+
+            tooltip.show() //todo refactor this
+
+            // if (!isInline) {
+            // tooltip.root.style.width = "100%"
+            tooltip.root.classList.add('fullwidth')
+
+            //  ;
+            // TODO  =========
+            let bounds = quill.getBounds(
+                formula.length + quill.getSelection().index
+            );
+            //  ;
+            console.log(bounds)
+            formula = String.raw`
+                    \displaylines{ ${formula} }
+                `
+
+            console.log(formula)
+
+
+            tooltip.root.style.top = `${bounds.bottom}px`;
+            // =============
+            tooltip.root.style.left = `0px`;
+            let typesetted = MathJax.tex2svg(formula);
+            tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
+
+            //  ;
+            if(isInline){
+
+                MathEditorModule.updateSize(null, editor.renderer)
+                editor.focus()
+                // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
+            }
+
+
+        })
+
+
+        // debugger
+        // editor.setValue(formula)
+        editor.insert(formula)
+
+
+        // if(isInline){
+        //     //  ;
+        //     //
+        //     // editor.renderer.updateCharacterSize()
+        //     updateSize(null, editor.renderer, formula.length)
+        //     // editor.setValue(formula)
+        //
+        // }
+
+
+
+
+        return editor;
+    }
+
+
+    static replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
+        //  ;
+        let node = blockMathNode
+        let begin = quill.getIndex(node.__blot.blot)
+        let formula = node.getAttribute('latex')
+
+        //  ;
+
+        // TODO this wouldn't be an insert text. It should be an insertEmbed
+        MathEditorModule.insertBlockTexEditor(begin, formula)
+
+        // == =========
+        // set cursor position to be the beginning of the math editor
+        // TODO
+        // quill.setSelection(begin+1)
+
+
+        node.remove()
+        let formulaHTML = MathJax.tex2svg(formula);
+        tooltip.show()
+
+        tooltip.root.innerHTML = `
+                <span class="ql-tooltip-arrow"></span>
+                ${formulaHTML.outerHTML}
+            `;
+    }
+
+
+
+    static replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
+        //  ;
+        let node = mathnode
+        let begin = quill.getIndex(node.__blot.blot)
+        let formula = node.getAttribute('latex')
+
+        //  ;
+
+        // TODO this wouldn't be an insert text. It should be an insertEmbed
+        MathEditorModule.insertInlineTexEditor(begin, formula)
+
+        // == =========
+        // set cursor position to be the beginning of the math editor
+        // TODO
+        // quill.setSelection(begin+1)
+
+
+        node.remove()
+        let formulaHTML = MathJax.tex2svg(formula);
+        tooltip.show()
+
+        tooltip.root.innerHTML = `
+                <span class="ql-tooltip-arrow"></span>
+                ${formulaHTML.outerHTML}
+            `;
+    }
 
     handleTextChange(delta, oldDelta, source) {
         if(source !== 'user') return;
@@ -498,11 +502,13 @@ class MathEditorModule {
         let blotNew = getBlot(range.index)
         let isBlockTex = (blot) => {
             //  ;
-            return blot.statics.blotName === blockTexEditorClassName
+            return blot.statics.blotName === BLOCK_TEX_EDITOR_CLASSNAME
             // return blot.parent.constructor.className === 'ql-syntax' // TODO change this...
         }
 
-
+        let isInlineTex = blot => {
+            // return blot.statics.blotName ===
+        }
         console.log("hey! ", isBlockTex(blotOld),  isBlockTex(blotNew) )
         //  ;
 
@@ -645,7 +651,7 @@ class EnterHandlerClass {
                             //  
                             // quill.format('code-block', true)
                             quill.deleteText(index-2, 2)
-                            insertBlockTexEditor(index-2, "")
+                            MathEditorModule.insertBlockTexEditor(index-2, "")
 
 
                         }else{
@@ -653,7 +659,7 @@ class EnterHandlerClass {
                             quill.deleteText(index-2, 2)
                             index = index - 2;
                             quill.insertText(index, `\n`)
-                            insertBlockTexEditor(index + 1, "")
+                            MathEditorModule.insertBlockTexEditor(index + 1, "")
                         }
                         return false;
                     }
@@ -709,7 +715,7 @@ class EnterHandlerClass {
                             // debugger;
                             quill.deleteText(index, 3)
                             // debugger
-                            insertInlineTexEditor(index, formula)
+                            MathEditorModule.insertInlineTexEditor(index, formula)
 
 
                             // quill.setSelection(index+1)
@@ -780,6 +786,9 @@ class EnterHandlerClass {
 
 }
 class InlineTexEditor extends InlineEmbed {
+    static blotName = INLINE_TEX_EDITOR_CLASSNAME
+    static className = INLINE_TEX_EDITOR_CLASSNAME
+    static tagName = 'div';
     static create(value = ""){
 
         //  ;
@@ -799,7 +808,7 @@ class InlineTexEditor extends InlineEmbed {
         node_wrappernode.style.width = "1px"; // default width
 
         window.node_wrappernode = node_wrappernode
-        // configureACEEditor(node_wrappernode, value, true) // im gonna try to call this outside
+
 
 
 
@@ -813,11 +822,13 @@ class InlineTexEditor extends InlineEmbed {
 
 }
 
-InlineTexEditor.blotName = INLINE_TEX_EDITOR_CLASSNAME
-InlineTexEditor.className = INLINE_TEX_EDITOR_CLASSNAME
-InlineTexEditor.tagName = 'div';
+
 
 class BlockTexEditor extends BlockEmbed{
+    static blotName = BLOCK_TEX_EDITOR_CLASSNAME;
+    static tagName = 'div';
+    static className = BLOCK_TEX_EDITOR_CLASSNAME
+
     // constructor() {
     //     super();
     // }
@@ -854,19 +865,16 @@ class BlockTexEditor extends BlockEmbed{
 
 }
 
-BlockTexEditor.blotName = blockTexEditorClassName;
-BlockTexEditor.tagName = 'div';
-BlockTexEditor.className = blockTexEditorClassName
 
 
 
 class BlockWrapper extends Block {
-
+    static blotName = 'blockwrapper'
+    static tagName = 'div'
+    static className = 'blockwrapper'
 }
 
-BlockWrapper.blotName = 'blockwrapper'
-BlockWrapper.tagName = 'div'
-BlockWrapper.className = 'blockwrapper'
+
 
 // TODO probably need to get rid of these global-namespaced variables...
 window.BlockWrapper = BlockWrapper
