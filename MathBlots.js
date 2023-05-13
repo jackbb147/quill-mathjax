@@ -7,9 +7,9 @@ const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE M
  * How to use:
  *
  * Quill.register(Block)
- * Quill.register(BlockMath)
+ * Quill.register(BlockMathDisplay)
  * Quill.register(InlineTex)
- * Quill.register(TweetBlot);
+ * Quill.register(InlineMathDisplay);
  * Quill.register('modules/MathEditorModule', MathEditorModule)
  * let enterHandler = new EnterHandlerClass();
  * let quill = new Quill('#editor-container', {
@@ -224,20 +224,13 @@ function insertBlockTexEditor(index, latex){
     // == ========= editor stuff
     let editor = configureACEEditor(document.getElementsByClassName(blockTexEditorClassName)[0], latex)
 
-
-     
 }
 
 function insertInlineTexEditor(index, latex){
     //  ;
-    // debugger
     let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
-    // alert("hey!")
-    // debugger;
     configureACEEditor(node_wrappernode, latex, true)
 
-
-    // editor.focus()
     //  for some reason this must be done in order to avoid cursor being
     //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
     setTimeout(function() {
@@ -307,7 +300,13 @@ function replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
 
 
 // https://stackoverflow.com/a/62778691
-let TexEditorBlot = Base => class extends Base {
+/**
+ * Displays typesetted math symbols, like "F = ma"
+ * @param Base
+ * @return {{value(*): *, create(*, boolean=): *, new(): {}, prototype: {}}}
+ * @constructor
+ */
+let MathDisplayBlot = Base => class extends Base {
     static create(latex, isInline = false) {
         let node = super.create()
         node.contentEditable = "false"
@@ -329,12 +328,12 @@ let TexEditorBlot = Base => class extends Base {
 }
 
 // TODO
-class BlockMath extends TexEditorBlot(BlockEmbed) {
+class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
     static create(latex) {
         //TODO
         let node = super.create(latex)
         //
-        node.addEventListener('mouseup', BlockMath.MouseUpHandler(node, {
+        node.addEventListener('mouseup', BlockMathDisplay.MouseUpHandler(node, {
             'code-block': true // todo get rid of this 'code-block'
         }))
         return node;
@@ -355,13 +354,13 @@ class BlockMath extends TexEditorBlot(BlockEmbed) {
 
 }
 
-BlockMath.tagName = 'div'
-BlockMath.className = 'mathbox-block'
-BlockMath.blotName = 'mathbox-block'
+BlockMathDisplay.tagName = 'div'
+BlockMathDisplay.className = 'mathbox-block'
+BlockMathDisplay.blotName = 'mathbox-block'
 
 
 // TODO change the name of this ...
-class TweetBlot extends TexEditorBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
+class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
     static create(latex) {
 
         let node = super.create(latex, true);
@@ -382,9 +381,9 @@ class TweetBlot extends TexEditorBlot(InlineEmbed) { // supposed to be inline ..
 
 }
 
-TweetBlot.blotName = 'mathbox-inline';
-TweetBlot.tagName = 'div';
-TweetBlot.className = 'mathbox-inline';
+InlineMathDisplay.blotName = 'mathbox-inline';
+InlineMathDisplay.tagName = 'div';
+InlineMathDisplay.className = 'mathbox-inline';
 
 
 class InlineTex extends Inline {
@@ -895,9 +894,9 @@ BlockWrapper.className = 'blockwrapper'
 // TODO probably need to get rid of these global-namespaced variables...
 window.BlockWrapper = BlockWrapper
 window.BlockTexEditor = BlockTexEditor
-window.TweetBlot = TweetBlot
+window.TweetBlot = InlineMathDisplay
 window.InlineTex = InlineTex
-window.BlockMath = BlockMath
+window.BlockMath = BlockMathDisplay
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
 

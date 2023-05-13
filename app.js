@@ -50,7 +50,7 @@ window.BlockquoteBlot = BlockquoteBlot
 
 Quill.register(Block)
 
-Quill.register(BlockMath)
+Quill.register(BlockMathDisplay)
 Quill.register(BlockTexEditor)
 Quill.register(InlineTexEditor)
 Quill.register(BlockWrapper)
@@ -62,7 +62,7 @@ Quill.register(LinkBlot);
 Quill.register(BlockquoteBlot);
 Quill.register(HeaderBlot);
 Quill.register(DividerBlot);
-Quill.register(TweetBlot);
+Quill.register(InlineMathDisplay);
 
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
