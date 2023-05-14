@@ -58,7 +58,6 @@ window.getBlot = getBlot
 
 // returns true if the given node is an inlineTexEdit blot; false otherwise.
 function isInlineTexEditBlot(domNode){
-//     TODO
 //     debugger;
     try{
         let x = domNode
@@ -81,6 +80,35 @@ function isInlineTexEditBlot(domNode){
         }
     }
 }
+
+// returns true if the given node is a blockTexEdit blot; false otherwise.
+function isBlockTexEditBlot(domNode){
+//     TODO
+//     debugger;
+    try{
+        let x = domNode
+        let blot = Quill.find(x)
+        while( ! (blot instanceof Scroll) && x.parentNode){
+            if(blot instanceof BlockTexEditor) return true
+            x = x.parentNode;
+            blot =  Quill.find(x)
+            if(!x || !x.parentNode) throw {
+                error: "x or x.parentNode is bad. ",
+                x,
+                parentNode: x.parentNode,
+                blot
+            }
+        }
+        return false
+    }catch(e){
+        throw {
+            caughtError: e
+        }
+    }
+}
+
+
+
 
 function findQuill(node){
     while (node) {
@@ -283,12 +311,14 @@ class MathEditorModule {
         this.options = options;
         this.clicked = null; // a dom node
         this.clickedInlineTexEditor = false // whether the domNode is an inline tex editor
+        this.clickedBlockTexEditor = false
         this.lastClickedIndex  = null;  //index of the last clicked item
 
         quill.root.addEventListener("click", ev => {
             // debugger
             let clicked = ev.target, lastClicked = this.clicked
             let isInlineTexEditor = isInlineTexEditBlot(clicked);
+            let isBlockTexEditor = isBlockTexEditBlot(clicked) //todo
             if(!isInlineTexEditor && this.clickedInlineTexEditor){
                 // User is clicking away from an inline tex editor...
                 // debugger;
@@ -300,20 +330,29 @@ class MathEditorModule {
                 quill.deleteText(begin, count, 'silent')
                 quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
                 this.tooltip.hide()
+            }else if(!isBlockTexEditor && this.clickedBlockTexEditor){
+                // User is clicking away from a block tex editor...
+                let editor = getACEEditorInstance(lastClicked)
+                let formula = editor.getValue()
+                //  ;
+                let begin = this.lastClickedIndex
+                let count = 1
+                quill.deleteText(begin, count, 'silent')
+                quill.insertEmbed(begin,  'mathbox-block', formula, Quill.sources.USER);
+                this.tooltip.hide()
             }
 
-            // debugger
+
             // update
             this.clicked = clicked
             this.clickedInlineTexEditor = isInlineTexEditor
+            this.clickedBlockTexEditor = isBlockTexEditor
             this.lastClickedIndex = quill.getSelection().index
         })
         // TODO some refactoring needed..
-        quill.on('selection-change', this.handleSelectionChange.bind(this))
+        // quill.on('selection-change', this.handleSelectionChange.bind(this))
         this.tooltip.root.classList.add("math-tooltip")
         window.quill = quill;
-
-
     }
     // for inline ace editor auto resizing
     // numChars: number of characters. If undefined, use renderer.characterWidth
@@ -514,27 +553,14 @@ class MathEditorModule {
      * @param attr
      */
     replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
-        //  ;
         let node = blockMathNode
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
-
-        //  ;
-
-        // TODO this wouldn't be an insert text. It should be an insertEmbed
         this.insertBlockTexEditor(begin, formula)
-
-        // == =========
-        // set cursor position to be the beginning of the math editor
-        // TODO
-        // quill.setSelection(begin+1)
-
-
         node.remove()
         let formulaHTML = MathJax.tex2svg(formula);
-        tooltip.show()
-
-        tooltip.root.innerHTML = `
+        this.tooltip.show()
+        this.tooltip.root.innerHTML = `
                 <span class="ql-tooltip-arrow"></span>
                 ${formulaHTML.outerHTML}
             `;
