@@ -42,11 +42,11 @@ function getBlot(index) {
     return quill.getLeaf(index)[0]
 }
 
-function getACEEditorInstance(domNode){
+function getACEEditorInstance(domNode) {
 //     TODO
 //     debugger
     var x = domNode
-    while(!x.env || !x.env.editor){
+    while (!x.env || !x.env.editor) {
         x = x.parentNode
     }
 
@@ -57,16 +57,16 @@ function getACEEditorInstance(domNode){
 window.getBlot = getBlot
 
 // returns true if the given node is an inlineTexEdit blot; false otherwise.
-function isInlineTexEditBlot(domNode){
+function isInlineTexEditBlot(domNode) {
 //     debugger;
-    try{
+    try {
         let x = domNode
         let blot = Quill.find(x)
-        while( ! (blot instanceof Scroll) && x.parentNode){
-            if(blot instanceof InlineTexEditor) return true
+        while (!(blot instanceof Scroll) && x.parentNode) {
+            if (blot instanceof InlineTexEditor) return true
             x = x.parentNode;
-            blot =  Quill.find(x)
-            if(!x || !x.parentNode) throw {
+            blot = Quill.find(x)
+            if (!x || !x.parentNode) throw {
                 error: "x or x.parentNode is bad. ",
                 x,
                 parentNode: x.parentNode,
@@ -74,7 +74,7 @@ function isInlineTexEditBlot(domNode){
             }
         }
         return false
-    }catch(e){
+    } catch (e) {
         throw {
             caughtError: e
         }
@@ -82,17 +82,17 @@ function isInlineTexEditBlot(domNode){
 }
 
 // returns true if the given node is a blockTexEdit blot; false otherwise.
-function isBlockTexEditBlot(domNode){
+function isBlockTexEditBlot(domNode) {
 //     TODO
 //     debugger;
-    try{
+    try {
         let x = domNode
         let blot = Quill.find(x)
-        while( ! (blot instanceof Scroll) && x.parentNode){
-            if(blot instanceof BlockTexEditor) return true
+        while (!(blot instanceof Scroll) && x.parentNode) {
+            if (blot instanceof BlockTexEditor) return true
             x = x.parentNode;
-            blot =  Quill.find(x)
-            if(!x || !x.parentNode) throw {
+            blot = Quill.find(x)
+            if (!x || !x.parentNode) throw {
                 error: "x or x.parentNode is bad. ",
                 x,
                 parentNode: x.parentNode,
@@ -100,7 +100,7 @@ function isBlockTexEditBlot(domNode){
             }
         }
         return false
-    }catch(e){
+    } catch (e) {
         throw {
             caughtError: e
         }
@@ -108,9 +108,7 @@ function isBlockTexEditBlot(domNode){
 }
 
 
-
-
-function findQuill(node){
+function findQuill(node) {
     while (node) {
         const quill = Quill.find(node);
         if (quill instanceof Quill) return quill;
@@ -183,6 +181,7 @@ class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be
     static blotName = 'mathbox-inline';
     static tagName = 'div';
     static className = 'mathbox-inline';
+
     static create(latex) {
         let node = super.create(latex, true);
         let mathNode = node.firstChild;
@@ -190,10 +189,10 @@ class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be
         mathNode.style["math-style"] = "normal"
         node.addEventListener('mouseup',
             // TODO find the math editor module instance
-            ()=>{
+            () => {
                 let math_editor_module = findQuill(node).getModule("MathEditorModule")
                 math_editor_module.replaceInlineMathWithInlineEdit(node, quill)
-        }
+            }
         )
         return node;
     }
@@ -219,7 +218,8 @@ class InlineTexEditor extends InlineEmbed {
     static blotName = INLINE_TEX_EDITOR_CLASSNAME
     static className = INLINE_TEX_EDITOR_CLASSNAME
     static tagName = 'div';
-    static create(value = ""){
+
+    static create(value = "") {
 
         //  ;
         let node = super.create();
@@ -240,19 +240,16 @@ class InlineTexEditor extends InlineEmbed {
         window.node_wrappernode = node_wrappernode
 
 
-
-
-
         return node
     }
 
-    static value(node){
+    static value(node) {
         return node.getAttribute("latex")
     }
 
 }
 
-class BlockTexEditor extends BlockEmbed{
+class BlockTexEditor extends BlockEmbed {
     static blotName = BLOCK_TEX_EDITOR_CLASSNAME;
     static tagName = 'div';
     static className = BLOCK_TEX_EDITOR_CLASSNAME
@@ -266,7 +263,7 @@ class BlockTexEditor extends BlockEmbed{
      * @param value{String} latex source code
      * @returns {*}
      */
-    static create(value=""){
+    static create(value = "") {
         let node = super.create();
         // TODO
         node.setAttribute("latex", value)
@@ -274,12 +271,12 @@ class BlockTexEditor extends BlockEmbed{
         return node
     }
 
-    static value(node){
+    static value(node) {
         return node.getAttribute("latex")
     }
 
     // This method hooks up the keybindings to this embed.
-    formats(){
+    formats() {
         let res = {}
         res[FORMAT_BLOCKTEXEDIT] = true
         return res
@@ -312,14 +309,14 @@ class MathEditorModule {
         this.clicked = null; // a dom node
         this.clickedInlineTexEditor = false // whether the domNode is an inline tex editor
         this.clickedBlockTexEditor = false
-        this.lastClickedIndex  = null;  //index of the last clicked item
+        this.lastClickedIndex = null;  //index of the last clicked item
 
         quill.root.addEventListener("click", ev => {
             // debugger
             let clicked = ev.target, lastClicked = this.clicked
             let isInlineTexEditor = isInlineTexEditBlot(clicked);
             let isBlockTexEditor = isBlockTexEditBlot(clicked) //todo
-            if(!isInlineTexEditor && this.clickedInlineTexEditor){
+            if (!isInlineTexEditor && this.clickedInlineTexEditor) {
                 // User is clicking away from an inline tex editor...
                 // debugger;
                 let editor = getACEEditorInstance(lastClicked)
@@ -328,9 +325,9 @@ class MathEditorModule {
                 let begin = this.lastClickedIndex
                 let count = 1
                 quill.deleteText(begin, count, 'silent')
-                quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
+                quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
                 this.tooltip.hide()
-            }else if(!isBlockTexEditor && this.clickedBlockTexEditor){
+            } else if (!isBlockTexEditor && this.clickedBlockTexEditor) {
                 // User is clicking away from a block tex editor...
                 let editor = getACEEditorInstance(lastClicked)
                 let formula = editor.getValue()
@@ -338,7 +335,7 @@ class MathEditorModule {
                 let begin = this.lastClickedIndex
                 let count = 1
                 quill.deleteText(begin, count, 'silent')
-                quill.insertEmbed(begin,  'mathbox-block', formula, Quill.sources.USER);
+                quill.insertEmbed(begin, 'mathbox-block', formula, Quill.sources.USER);
                 this.tooltip.hide()
             }
 
@@ -350,10 +347,10 @@ class MathEditorModule {
             this.lastClickedIndex = quill.getSelection().index
         })
         // TODO some refactoring needed..
-        // quill.on('selection-change', this.handleSelectionChange.bind(this))
         this.tooltip.root.classList.add("math-tooltip")
         window.quill = quill;
     }
+
     // for inline ace editor auto resizing
     // numChars: number of characters. If undefined, use renderer.characterWidth
     updateSize(e, renderer, numChars) {
@@ -361,7 +358,7 @@ class MathEditorModule {
         var text = renderer.session.getLine(0);
         var chars = renderer.session.$getStringScreenWidth(text)[0];
 
-        var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
+        var width = Math.max(chars, 2) * (renderer.characterWidth) // text size
             + 2 * renderer.$padding // padding
             + 2 // little extra for the cursor
             + 0 // add border width if needed
@@ -378,7 +375,7 @@ class MathEditorModule {
      * @param index
      * @param latex the default text input to feed into the editor
      */
-    insertBlockTexEditor(index, latex){
+    insertBlockTexEditor(index, latex) {
         // quill.insertText(begin, formula, attr)
         let res = quill.insertEmbed(index, BLOCK_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
         // == ========= editor stuff
@@ -389,14 +386,14 @@ class MathEditorModule {
      * @param index
      * @param latex
      */
-    insertInlineTexEditor(index, latex){
+    insertInlineTexEditor(index, latex) {
         //  ;
         let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
         this.configureACEEditor(node_wrappernode, latex, true)
 
         //  for some reason this must be done in order to avoid cursor being
         //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
-        setTimeout(function() {
+        setTimeout(function () {
             // editor.setValue("")
             editor.focus()
         }, 0);
@@ -407,7 +404,7 @@ class MathEditorModule {
      * @param formula
      * @param isInline {Boolean}
      */
-    configureACEEditor(node, formula="", isInline = false){
+    configureACEEditor(node, formula = "", isInline = false) {
         // var editorNode = document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0]
         var editorNode = node
 
@@ -420,10 +417,10 @@ class MathEditorModule {
         editor.session.setMode("ace/mode/latex");
         editor.focus()
         var staticWordCompleter = {
-            getCompletions: function(editor, session, pos, prefix, callback) {
+            getCompletions: function (editor, session, pos, prefix, callback) {
                 // var wordList = [String.raw `\foo`, "bar", "baz"];
-                var wordList  = MATHJAXCOMMANDS
-                callback(null, wordList.map(function(word) {
+                var wordList = MATHJAXCOMMANDS
+                callback(null, wordList.map(function (word) {
                     return {
                         caption: word,
                         value: word,
@@ -457,9 +454,9 @@ class MathEditorModule {
 
         editor.commands.addCommand({
             name: 'myCommand',
-            bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
+            bindKey: {win: 'Ctrl-enter', mac: 'Command-enter'},
             // TODO modify this for inline
-            exec: this.getConvertEditorToMathHandler( isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+            exec: this.getConvertEditorToMathHandler(isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
             readOnly: true, // false if this command should not apply in readOnly mode
             // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
             // scrollIntoView: "cursor", control how cursor is scolled into view after the command
@@ -467,7 +464,7 @@ class MathEditorModule {
 
         let quill = this.quill, tooltip = this.tooltip
 
-        editor.session.on("change", (delta)=>{
+        editor.session.on("change", (delta) => {
 
             let formula = editor.getValue()
 
@@ -497,7 +494,7 @@ class MathEditorModule {
             let typesetted = MathJax.tex2svg(formula);
             tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
-            if(isInline){
+            if (isInline) {
 
                 this.updateSize(null, editor.renderer)
                 editor.focus()
@@ -510,15 +507,10 @@ class MathEditorModule {
         editor.insert(formula)
 
 
-
-
-
-
-
         return editor;
     }
 
-    getConvertEditorToMathHandler(isInline = false){
+    getConvertEditorToMathHandler(isInline = false) {
         let _ = this;
 
         /**
@@ -546,13 +538,12 @@ class MathEditorModule {
         return f
     }
 
-
     /**
      * @param blockMathNode
      * @param quill
      * @param attr
      */
-    replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
+    replaceBlockMathWithBlockEdit(blockMathNode, quill, attr) {
         let node = blockMathNode
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
@@ -566,13 +557,12 @@ class MathEditorModule {
             `;
     }
 
-
     /**
      * @param mathnode
      * @param quill
      * @param attr
      */
-    replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
+    replaceInlineMathWithInlineEdit(mathnode, quill, attr) {
         //  ;
         let node = mathnode
         let begin = quill.getIndex(node.__blot.blot)
@@ -580,80 +570,26 @@ class MathEditorModule {
 
         // TODO this wouldn't be an insert text. It should be an insertEmbed
         this.insertInlineTexEditor(begin, formula)
-
-        // == =========
-        // set cursor position to be the beginning of the math editor
-        // TODO
-        // quill.setSelection(begin+1)
-
-
         node.remove()
         let formulaHTML = MathJax.tex2svg(formula);
-        tooltip.show()
+        this.tooltip.show()
 
-        tooltip.root.innerHTML = `
+        this.tooltip.root.innerHTML = `
                 <span class="ql-tooltip-arrow"></span>
                 ${formulaHTML.outerHTML}
             `;
     }
 
-
-    // This implements the 'click away' feature that automatically
-    // typesets latex source code into mathjax block.
-    handleSelectionChange(range, oldRange, source) {
-        //  ;
-        // debugger
-        // console.log("hey! ", range, oldRange, source)
-        if (source !== 'user' || !range || !oldRange) return;
-        let blotOld = getBlot(oldRange.index)
-        let blotNew = getBlot(range.index)
-        let tooltip = this.tooltip
-        let isBlockTex = (blot) => {
-            //  ;
-            return blot.statics.blotName === BLOCK_TEX_EDITOR_CLASSNAME
-
-        }
-
-        let isInlineTex = blot => {
-            return blot.statics.blotName === INLINE_TEX_EDITOR_CLASSNAME
-        }
-
-        // debugger
-        console.log("hey! ", isBlockTex(blotOld),  isBlockTex(blotNew) )
-        //  ;
-
-        if ((isBlockTex(blotOld) && !isBlockTex(blotNew))
-            // ||
-            // (isInlineTex(blotOld) && !isInlineTex(blotNew))
-        ) {
-            console.log("you exited inline or block tex.", blotOld)
-            //  ;
-            let editor = blotOld.domNode.env.editor;
-            let formula = editor.getValue()
-            //  ;
-            let begin = quill.getIndex(blotOld);
-            let count = 1
-            quill.deleteText(begin, count, 'silent')
-            quill.insertEmbed(begin,  'mathbox-block', formula, Quill.sources.USER);
-            tooltip.hide()
-
-        }else if ((isInlineTex(blotOld) && !isInlineTex(blotNew))){
-            // alert("hey!")
-        }
-
-
-    }
-
     static getBindings() {
         return {
             // https://quilljs.com/docs/modules/keyboard/
-            startBlockMathEdit:{
+            startBlockMathEdit: {
                 key: 'enter',
-                handler: function(range, context){
+                handler: function (range, context) {
                     // alert("hey!")
                     let quill = this.quill;
                     let math_editor_module = this.quill.getModule("MathEditorModule");
-                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
+                    if (!math_editor_module) throw new Error("No math editor module instance found. ")
                     //
                     let prefix = context.prefix;
                     let lastTwo = prefix.slice(-2);
@@ -661,13 +597,13 @@ class MathEditorModule {
                     let offset = context.offset;
                     console.log("Hey, you pressed enter. ", range, context, lastTwo, quill.getLine(index))
 
-                    if(lastTwo === '$$'){
-                        if(offset === 2){
-                            quill.deleteText(index-2, 2)
-                            math_editor_module.insertBlockTexEditor(index-2, "")
-                        }else{
+                    if (lastTwo === '$$') {
+                        if (offset === 2) {
+                            quill.deleteText(index - 2, 2)
+                            math_editor_module.insertBlockTexEditor(index - 2, "")
+                        } else {
                             // alert("hey! no!")
-                            quill.deleteText(index-2, 2)
+                            quill.deleteText(index - 2, 2)
                             index = index - 2;
                             quill.insertText(index, `\n`)
                             math_editor_module.insertBlockTexEditor(index + 1, "")
@@ -680,21 +616,21 @@ class MathEditorModule {
             backspace: {
                 key: 'backspace',
                 format: ['inlinetex', 'code-block'],
-                handler: function(range, context){
+                handler: function (range, context) {
                     let quill = this.quill
                     console.log("hey!")
-                    console.log("backspace pressed while editing latex. ",range, context)
+                    console.log("backspace pressed while editing latex. ", range, context)
                     let prefix = context.prefix;
-                    if(context.format.hasOwnProperty("code-block")){
+                    if (context.format.hasOwnProperty("code-block")) {
 
-                        if(prefix.length < 1){
+                        if (prefix.length < 1) {
                             // User is about to exit formula editor  ...
                             console.log("hey! You wanna delete me?")
                             quill.removeFormat(quill.getSelection().index)
                             _.tooltip.hide()
                         }
-                    }else{
-                        if(prefix.length < 2){
+                    } else {
+                        if (prefix.length < 2) {
                             // User is about to exit formula editor  ...
                             console.log("hey! You wanna delete me?")
                             _.tooltip.hide()
@@ -708,23 +644,23 @@ class MathEditorModule {
             dollarSign: {
                 key: 52,
                 shiftKey: true,
-                handler: function(range, context){
+                handler: function (range, context) {
                     console.log("hey! dollar sign pressed")
                     // debugger
                     let quill = this.quill;
                     let math_editor_module = this.quill.getModule("MathEditorModule");
-                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
+                    if (!math_editor_module) throw new Error("No math editor module instance found. ")
                     let index = quill.getSelection().index;
                     quill.insertText(index, '$$')
-                    quill.setSelection(index+1)
+                    quill.setSelection(index + 1)
 
-                    quill.once('text-change', (delta, oldDelta, source)=>{
+                    quill.once('text-change', (delta, oldDelta, source) => {
                         console.log("hey!")
                         console.log(delta, oldDelta, source)
                         // debugger
                         let ops1 = delta.ops[1]; // todo change this name...
 
-                        if(ops1.hasOwnProperty("insert")){
+                        if (ops1.hasOwnProperty("insert")) {
                             let formula = ops1.insert
                             // alert("hey! you wanna edit latex?")
 
@@ -742,7 +678,7 @@ class MathEditorModule {
                             // //  ;
                             // quill.insertText(index, text, {'inlinetex': true})
                             // quill.setSelection(index+2)
-                        }else if(ops1.hasOwnProperty("delete")){
+                        } else if (ops1.hasOwnProperty("delete")) {
                             console.log("hey! you dont wanna edit latex anymore?")
                             quill.deleteText(index, 1)
                         }
@@ -753,14 +689,3 @@ class MathEditorModule {
     }
 
 }
-
-
-
-// TODO probably need to get rid of these global-namespaced variables...
-window.BlockWrapper = BlockWrapper
-window.BlockTexEditor = BlockTexEditor
-window.InlineMathDisplay = InlineMathDisplay
-window.BlockMathDisplay = BlockMathDisplay
-window.MyToolTip = MyToolTip
-window.MathEditorModule = MathEditorModule;
-

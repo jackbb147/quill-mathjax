@@ -1,68 +1,9 @@
-
-
-// let Text = Quill.import('blots/block/text')
-// window.Text = Text
-class BoldBlot extends Inline { }
-BoldBlot.blotName = 'bold';
-BoldBlot.tagName = 'strong';
-
-class ItalicBlot extends Inline { }
-ItalicBlot.blotName = 'italic';
-ItalicBlot.tagName = 'em';
-
-class LinkBlot extends Inline {
-    static create(url) {
-        let node = super.create();
-        node.setAttribute('href', url);
-        node.setAttribute('target', '_blank');
-        return node;
-    }
-
-    static formats(node) {
-        return node.getAttribute('href');
-    }
-}
-LinkBlot.blotName = 'link';
-LinkBlot.tagName = 'a';
-
-
-
-class HeaderBlot extends Block {
-    static formats(node) {
-        return HeaderBlot.tagName.indexOf(node.tagName) + 1;
-    }
-}
-HeaderBlot.blotName = 'header';
-HeaderBlot.tagName = ['H1', 'H2'];
-
-class DividerBlot extends BlockEmbed { }
-DividerBlot.blotName = 'divider';
-DividerBlot.tagName = 'hr';
-
-
-class BlockquoteBlot extends Block { }
-BlockquoteBlot.blotName = 'blockquote';
-BlockquoteBlot.tagName = 'blockquote';
-
-window.BlockquoteBlot = BlockquoteBlot
-
-
-
 Quill.register(Block)
-
 Quill.register(BlockMathDisplay)
 Quill.register(BlockTexEditor)
 Quill.register(InlineTexEditor)
 Quill.register(BlockWrapper)
-
-Quill.register(BoldBlot);
-Quill.register(ItalicBlot);
-Quill.register(LinkBlot);
-Quill.register(BlockquoteBlot);
-Quill.register(HeaderBlot);
-Quill.register(DividerBlot);
 Quill.register(InlineMathDisplay);
-
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
 
@@ -137,10 +78,3 @@ $('#divider-button').click(function() {
     window.configureACEEditor(node, latex)
 
 });
-
-
-window.f = ()=>{
-    quill.format("blockwrapper", true)
-}
-
-//
