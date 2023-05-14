@@ -33,15 +33,6 @@ const Tooltip = Quill.import('ui/tooltip');
 
 window.SyntaxCodeBlock = SyntaxCodeBlock
 window.Block = Block;
-
-
-// TODO refactor this somewhere else....
-// Helper function to get the blot at the cursoor position.
-function getBlot(index) {
-    if (index === undefined) index = quill.getSelection().index;
-    return quill.getLeaf(index)[0]
-}
-
 function getACEEditorInstance(domNode) {
 //     TODO
 //     debugger
@@ -54,7 +45,6 @@ function getACEEditorInstance(domNode) {
 
 }
 
-window.getBlot = getBlot
 
 // returns true if the given node is an inlineTexEdit blot; false otherwise.
 function isInlineTexEditBlot(domNode) {

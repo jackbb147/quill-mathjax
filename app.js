@@ -7,7 +7,6 @@ Quill.register(InlineMathDisplay);
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
 
-
 let quill = new Quill('#editor-container', {
     theme: "bubble",
     modules:{
