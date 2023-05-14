@@ -83,7 +83,13 @@ function isInlineTexEditBlot(domNode){
     }
 }
 
-
+function findQuill(node){
+    while (node) {
+        const quill = Quill.find(node);
+        if (quill instanceof Quill) return quill;
+        node = node.parentElement;
+    }
+}
 
 // https://stackoverflow.com/a/62778691
 /**
@@ -113,6 +119,8 @@ let MathDisplayBlot = Base => class extends Base {
     }
 }
 
+
+
 // TODO
 class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
     static tagName = 'div'
@@ -138,8 +146,10 @@ class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
      * @constructor
      */
     static MouseUpHandler(node, attr) {
+        // TODO find the math editor module instance
         return (e) => {
-            MathEditorModule.replaceBlockMathWithBlockEdit(node, quill, attr)
+            let math_editor_module = findQuill(node).getModule("MathEditorModule")
+            math_editor_module.replaceBlockMathWithBlockEdit(node, quill, attr)
         }
     }
 
@@ -157,7 +167,11 @@ class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be
         mathNode.removeAttribute("display")
         mathNode.style["math-style"] = "normal"
         node.addEventListener('mouseup',
-            ()=>{MathEditorModule.replaceInlineMathWithInlineEdit(node, quill)}
+            // TODO find the math editor module instance
+            ()=>{
+                let math_editor_module = findQuill(node).getModule("MathEditorModule")
+                math_editor_module.replaceInlineMathWithInlineEdit(node, quill)
+        }
         )
         return node;
     }
@@ -238,23 +252,17 @@ class MathEditorModule {
     }
 // for inline ace editor auto resizing
 // numChars: number of characters. If undefined, use renderer.characterWidth
-    static updateSize(e, renderer, numChars) {
+    updateSize(e, renderer, numChars) {
         // debugger
         var text = renderer.session.getLine(0);
         var chars = renderer.session.$getStringScreenWidth(text)[0];
 
-        // if(renderer.characterWidth === 0) debugger;
-        // if(renderer.characterWidth != 0) debugger;
-        // if(renderer.characterWidth === 0)  ;
         var width = Math.max(chars, 2) * ( renderer.characterWidth) // text size
             + 2 * renderer.$padding // padding
             + 2 // little extra for the cursor
             + 0 // add border width if needed
 
         // update container size
-
-        //
-        // console.log("hey")
         renderer.container.style.width = width + "px";
         // update computed size stored by the editor
         renderer.onResize(false, 0, width, renderer.$size.height);
@@ -262,27 +270,25 @@ class MathEditorModule {
 
 
     /**
-     * TODO this doesnt have to be static
      * insert an ACE editor at the specified index of the quill instance.
      * @param index
      * @param latex the default text input to feed into the editor
      */
-    static insertBlockTexEditor(index, latex){
+    insertBlockTexEditor(index, latex){
         // quill.insertText(begin, formula, attr)
         let res = quill.insertEmbed(index, BLOCK_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
         // == ========= editor stuff
-        let editor = MathEditorModule.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
+        let editor = this.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
     }
 
     /**
-     * TODO this doesnt have to be static.
      * @param index
      * @param latex
      */
-    static insertInlineTexEditor(index, latex){
+    insertInlineTexEditor(index, latex){
         //  ;
         let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
-        MathEditorModule.configureACEEditor(node_wrappernode, latex, true)
+        this.configureACEEditor(node_wrappernode, latex, true)
 
         //  for some reason this must be done in order to avoid cursor being
         //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
@@ -299,7 +305,7 @@ class MathEditorModule {
      * @param formula
      * @param isInline {Boolean}
      */
-    static configureACEEditor(node, formula="", isInline = false){
+    configureACEEditor(node, formula="", isInline = false){
         // var editorNode = document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0]
         var editorNode = node
 
@@ -402,7 +408,7 @@ class MathEditorModule {
             //  ;
             if(isInline){
 
-                MathEditorModule.updateSize(null, editor.renderer)
+                this.updateSize(null, editor.renderer)
                 editor.focus()
                 // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
             }
@@ -433,12 +439,11 @@ class MathEditorModule {
 
 
     /**
-     * todo this doesnt have to be static.
      * @param blockMathNode
      * @param quill
      * @param attr
      */
-    static replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
+    replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
         //  ;
         let node = blockMathNode
         let begin = quill.getIndex(node.__blot.blot)
@@ -447,7 +452,7 @@ class MathEditorModule {
         //  ;
 
         // TODO this wouldn't be an insert text. It should be an insertEmbed
-        MathEditorModule.insertBlockTexEditor(begin, formula)
+        this.insertBlockTexEditor(begin, formula)
 
         // == =========
         // set cursor position to be the beginning of the math editor
@@ -467,21 +472,18 @@ class MathEditorModule {
 
 
     /**
-     * todo this doesnt have to be static
      * @param mathnode
      * @param quill
      * @param attr
      */
-    static replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
+    replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
         //  ;
         let node = mathnode
         let begin = quill.getIndex(node.__blot.blot)
         let formula = node.getAttribute('latex')
 
-        //  ;
-
         // TODO this wouldn't be an insert text. It should be an insertEmbed
-        MathEditorModule.insertInlineTexEditor(begin, formula)
+        this.insertInlineTexEditor(begin, formula)
 
         // == =========
         // set cursor position to be the beginning of the math editor
@@ -499,7 +501,7 @@ class MathEditorModule {
             `;
     }
 
-    // todo this doesnt have to be static
+
     handleTextChange(delta, oldDelta, source) {
         if(source !== 'user') return;
         console.log("text changed", delta, this)
@@ -612,6 +614,116 @@ class MathEditorModule {
         // console.log(blotOld, oldRange.index, blotNew, range.index, source)
 
     }
+
+    getBindings() {
+        return {
+            // https://quilljs.com/docs/modules/keyboard/
+            startBlockMathEdit:{
+                key: 'enter',
+                handler: (range, context)=> {
+                    // alert("hey!")
+                    let quill = this.quill;
+                    let math_editor_module = this.quill.getModule("MathEditorModule");
+                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
+                    //
+                    let prefix = context.prefix;
+                    let lastTwo = prefix.slice(-2);
+                    let index = range.index;
+                    let offset = context.offset;
+                    console.log("Hey, you pressed enter. ", range, context, lastTwo, quill.getLine(index))
+
+                    if(lastTwo === '$$'){
+                        if(offset === 2){
+                            quill.deleteText(index-2, 2)
+                            math_editor_module.insertBlockTexEditor(index-2, "")
+                        }else{
+                            // alert("hey! no!")
+                            quill.deleteText(index-2, 2)
+                            index = index - 2;
+                            quill.insertText(index, `\n`)
+                            math_editor_module.insertBlockTexEditor(index + 1, "")
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            backspace: {
+                key: 'backspace',
+                format: ['inlinetex', 'code-block'],
+                handler: (range, context)=>{
+                    let quill = this.quill
+                    console.log("hey!")
+                    console.log("backspace pressed while editing latex. ",range, context)
+                    let prefix = context.prefix;
+                    if(context.format.hasOwnProperty("code-block")){
+
+                        if(prefix.length < 1){
+                            // User is about to exit formula editor  ...
+                            console.log("hey! You wanna delete me?")
+                            quill.removeFormat(quill.getSelection().index)
+                            _.tooltip.hide()
+                        }
+                    }else{
+                        if(prefix.length < 2){
+                            // User is about to exit formula editor  ...
+                            console.log("hey! You wanna delete me?")
+                            _.tooltip.hide()
+                        }
+                    }
+
+                    return true;
+                }
+            },
+
+            dollarSign: {
+                key: 52,
+                shiftKey: true,
+                handler: ()=>{
+                    console.log("hey! dollar sign pressed")
+                    let quill = this.quill;
+                    let math_editor_module = this.quill.getModule("MathEditorModule");
+                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
+                    let index = quill.getSelection().index;
+                    quill.insertText(index, '$$')
+                    quill.setSelection(index+1)
+
+                    quill.once('text-change', (delta, oldDelta, source)=>{
+                        console.log("hey!")
+                        console.log(delta, oldDelta, source)
+                        // debugger
+                        let ops1 = delta.ops[1]; // todo change this name...
+
+                        if(ops1.hasOwnProperty("insert")){
+                            let formula = ops1.insert
+                            // alert("hey! you wanna edit latex?")
+
+                            // debugger;
+                            quill.deleteText(index, 3)
+                            // debugger
+                            math_editor_module.insertInlineTexEditor(index, formula)
+
+
+                            // quill.setSelection(index+1)
+                            // return false
+
+                            // let text =  ' ' + ops1.insert;
+                            // quill.deleteText(index, 2 + text.length)
+                            // //  ;
+                            // quill.insertText(index, text, {'inlinetex': true})
+                            // quill.setSelection(index+2)
+                        }else if(ops1.hasOwnProperty("delete")){
+                            console.log("hey! you dont wanna edit latex anymore?")
+                            quill.deleteText(index, 1)
+                        }
+                    })
+
+
+                }
+            },
+        };
+    }
+
 }
 
 
@@ -661,16 +773,15 @@ class EnterHandlerClass {
     }
 
     getBindings() {
-        let _ = this;
-
         return {
             // https://quilljs.com/docs/modules/keyboard/
-            // TODO is there a way to somehow propagate the keyboard event from the ace editor up to the enclosing quill instance?
             startBlockMathEdit:{
                 key: 'enter',
                 handler: (range, context)=> {
                     // alert("hey!")
                     let quill = this.quill;
+                    let math_editor_module = this.quill.getModule("MathEditorModule");
+                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
                     let prefix = context.prefix;
                     let lastTwo = prefix.slice(-2);
                     let index = range.index;
@@ -680,15 +791,13 @@ class EnterHandlerClass {
                     if(lastTwo === '$$'){
                         if(offset === 2){
                             quill.deleteText(index-2, 2)
-                            MathEditorModule.insertBlockTexEditor(index-2, "")
-
-
+                            math_editor_module.insertBlockTexEditor(index-2, "")
                         }else{
                             // alert("hey! no!")
                             quill.deleteText(index-2, 2)
                             index = index - 2;
                             quill.insertText(index, `\n`)
-                            MathEditorModule.insertBlockTexEditor(index + 1, "")
+                            math_editor_module.insertBlockTexEditor(index + 1, "")
                         }
                         return false;
                     }
@@ -729,6 +838,8 @@ class EnterHandlerClass {
                 handler: ()=>{
                     console.log("hey! dollar sign pressed")
                     let quill = this.quill;
+                    let math_editor_module = this.quill.getModule("MathEditorModule");
+                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
                     let index = quill.getSelection().index;
                     quill.insertText(index, '$$')
                     quill.setSelection(index+1)
@@ -746,7 +857,7 @@ class EnterHandlerClass {
                             // debugger;
                             quill.deleteText(index, 3)
                             // debugger
-                            MathEditorModule.insertInlineTexEditor(index, formula)
+                            math_editor_module.insertInlineTexEditor(index, formula)
 
 
                             // quill.setSelection(index+1)
