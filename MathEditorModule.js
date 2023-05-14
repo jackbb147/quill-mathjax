@@ -167,11 +167,7 @@ class MathEditorModule {
             // debugger;
             editor.focus()
             let index = quill.getSelection().index;
-            let aceDomNode = quill.getLeaf(index)[0].domNode.getElementsByClassName("ace_content")[0]
-            _.lastClickedIndex = index;
-            _.clicked = aceDomNode;
-            _.clickedInlineTexEditor = false;
-            _.clickedBlockTexEditor = true;
+            _.action("setClick", {index, isInline: false })
         }, 0);
     }
 
@@ -189,15 +185,10 @@ class MathEditorModule {
         //  for some reason this must be done in order to avoid cursor being
         //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
         setTimeout(function () {
-            // editor.setValue("")
             // debugger;
             editor.focus()
             let index = quill.getSelection().index;
-            // quill.setSelection(index + 1);
             _.action("setClick", {index, isInline: true})
-
-
-
         }, 0);
     }
 
@@ -206,10 +197,11 @@ class MathEditorModule {
             case "setClick":
                 // TODO
                 try{
+                    // debugger;
                     let quill = this.quill;
-                    let index = param.index;
                     let isInline = param.isInline;
-                    let aceDomNode = quill.getLeaf(index+1)[0].domNode.getElementsByClassName("ace_content")[0]
+                    let index = param.index
+                    let aceDomNode = quill.getLeaf(isInline ? index + 1 : index)[0].domNode.getElementsByClassName("ace_content")[0]
                     this.lastClickedIndex = index;
                     this.clicked = aceDomNode;
                     this.clickedInlineTexEditor = isInline;
