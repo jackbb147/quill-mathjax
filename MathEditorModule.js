@@ -158,14 +158,12 @@ class MathEditorModule {
      * @param latex the default text input to feed into the editor
      */
     insertBlockTexEditor(index, latex) {
-        // quill.insertText(begin, formula, attr)
         let _ = this,
             quill = _.quill;
         let res = quill.insertEmbed(index, BLOCK_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
-        // == ========= editor stuff
+        // =========== editor stuff
         let editor = this.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
         setTimeout(function () {
-            // editor.setValue("")
             // debugger;
             editor.focus()
             let index = quill.getSelection().index;
@@ -174,8 +172,6 @@ class MathEditorModule {
             _.clicked = aceDomNode;
             _.clickedInlineTexEditor = false;
             _.clickedBlockTexEditor = true;
-
-
         }, 0);
     }
 
@@ -198,14 +194,29 @@ class MathEditorModule {
             editor.focus()
             let index = quill.getSelection().index;
             // quill.setSelection(index + 1);
-            let aceDomNode = quill.getLeaf(index+1)[0].contentNode.getElementsByClassName("ace_content")[0]
-            _.lastClickedIndex = index;
-            _.clicked = aceDomNode;
-            _.clickedInlineTexEditor = true;
-            _.clickedBlockTexEditor = false;
+            _.action("setClick", {index, isInline: true})
+
 
 
         }, 0);
+    }
+
+    action(type, param){
+        switch(type){
+            case "setClick":
+                // TODO
+                try{
+                    let quill = this.quill;
+                    let index = param.index;
+                    let isInline = param.isInline;
+                    let aceDomNode = quill.getLeaf(index+1)[0].domNode.getElementsByClassName("ace_content")[0]
+                    this.lastClickedIndex = index;
+                    this.clicked = aceDomNode;
+                    this.clickedInlineTexEditor = isInline;
+                    this.clickedBlockTexEditor = !isInline;
+                }catch(e){throw e}
+                break
+        }
     }
 
 
