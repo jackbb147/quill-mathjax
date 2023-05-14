@@ -261,6 +261,15 @@ class MathEditorModule {
         editor.completers.push(staticWordCompleter)
         window.editor = editor;
 
+        this.__set_editor_commands(editor, isInline)
+
+        let quill = this.quill, tooltip = this.tooltip
+        this.__set_up_live_preview(editor, isInline)
+        editor.insert(formula)
+        return editor;
+    }
+
+    __set_editor_commands(editor, isInline){
         editor.commands.addCommand({
             name: 'myCommand',
             bindKey: {win: 'Ctrl-enter', mac: 'Command-enter'},
@@ -270,11 +279,6 @@ class MathEditorModule {
             // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
             // scrollIntoView: "cursor", control how cursor is scolled into view after the command
         });
-
-        let quill = this.quill, tooltip = this.tooltip
-        this.__set_up_live_preview(editor, isInline)
-        editor.insert(formula)
-        return editor;
     }
 
     __set_up_live_preview(editor, isInline){
