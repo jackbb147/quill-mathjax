@@ -207,4 +207,3 @@ class BlockWrapper extends Block {
     static tagName = 'div'
     static className = 'blockwrapper'
 }
-

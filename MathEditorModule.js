@@ -63,7 +63,6 @@ function isBlockTexEditBlot(domNode) {
     }
 }
 
-
 function findQuill(node) {
     while (node) {
         const quill = Quill.find(node);
@@ -71,7 +70,6 @@ function findQuill(node) {
         node = node.parentElement;
     }
 }
-
 
 class MathEditorModule {
     constructor(quill, options) {
@@ -123,8 +121,17 @@ class MathEditorModule {
         })
         // TODO some refactoring needed..
         this.tooltip.root.classList.add("math-tooltip")
+
+
+        this.setFontSize()
         window.quill = quill;
     }
+
+
+    setFontSize(){
+        document.getElementById("editor-container").style.fontSize = EDITOR_CONTAINER_FONTSIZE
+    }
+
 
     // for inline ace editor auto resizing
     // numChars: number of characters. If undefined, use renderer.characterWidth
