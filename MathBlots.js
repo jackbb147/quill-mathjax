@@ -54,7 +54,6 @@ function getACEEditorInstance(domNode){
 
 }
 
-
 window.getBlot = getBlot
 
 // returns true if the given node is an inlineTexEdit blot; false otherwise.
@@ -119,9 +118,6 @@ let MathDisplayBlot = Base => class extends Base {
     }
 }
 
-
-
-// TODO
 class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
     static tagName = 'div'
     static className = 'mathbox-block'
@@ -155,8 +151,6 @@ class BlockMathDisplay extends MathDisplayBlot(BlockEmbed) {
 
 }
 
-
-// TODO change the name of this ...
 class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be inline ..., not blockEmbed...
     static blotName = 'mathbox-inline';
     static tagName = 'div';
@@ -178,8 +172,6 @@ class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be
 }
 
 
-// TODO remove this ...
-
 class MyToolTip extends Tooltip {
     // This is the innerHTML of the tooltip
 // https://stackoverflow.com/questions/41131547/building-custom-quill-editor-theme
@@ -192,6 +184,92 @@ class MyToolTip extends Tooltip {
     constructor(quill, bounds) {
         super(quill, bounds);
     }
+}
+
+
+class InlineTexEditor extends InlineEmbed {
+    static blotName = INLINE_TEX_EDITOR_CLASSNAME
+    static className = INLINE_TEX_EDITOR_CLASSNAME
+    static tagName = 'div';
+    static create(value = ""){
+
+        //  ;
+        let node = super.create();
+        var node_wrappernode = document.createElement("div")
+
+        node_wrappernode.classList.add("inline-editor-wrapper")
+        node.appendChild(node_wrappernode)
+
+
+        node.setAttribute("latex", value)
+        node.setAttribute("isInlineTexEditor", true)
+        node.style.display = "inline" // todo moe this to a css file
+
+        node_wrappernode.style.display = "inline-block"
+        node_wrappernode.style["vertical-align"] = "middle";
+        node_wrappernode.style.width = "1px"; // default width
+
+        window.node_wrappernode = node_wrappernode
+
+
+
+
+
+        return node
+    }
+
+    static value(node){
+        return node.getAttribute("latex")
+    }
+
+}
+
+class BlockTexEditor extends BlockEmbed{
+    static blotName = BLOCK_TEX_EDITOR_CLASSNAME;
+    static tagName = 'div';
+    static className = BLOCK_TEX_EDITOR_CLASSNAME
+
+    // constructor() {
+    //     super();
+    // }
+
+    /**
+     *
+     * @param value{String} latex source code
+     * @returns {*}
+     */
+    static create(value=""){
+        let node = super.create();
+        // TODO
+        node.setAttribute("latex", value)
+        node.setAttribute("isBlockTexEditor", true)
+        return node
+    }
+
+    static value(node){
+        return node.getAttribute("latex")
+    }
+
+    // This method hooks up the keybindings to this embed.
+    formats(){
+        let res = {}
+        res[FORMAT_BLOCKTEXEDIT] = true
+        return res
+    }
+
+    // format(name, value){
+    //      ;
+    //
+    // }
+
+
+}
+
+
+class BlockWrapper extends Block {
+    static blotName = 'blockwrapper'
+    static tagName = 'div'
+    static className = 'blockwrapper'
 }
 
 
@@ -232,9 +310,6 @@ class MathEditorModule {
         })
         // TODO some refactoring needed..
         quill.on('selection-change', this.handleSelectionChange.bind(this))
-        quill.on("text-change", this.handleTextChange.bind(this))
-
-
         this.tooltip.root.classList.add("math-tooltip")
         window.quill = quill;
 
@@ -497,73 +572,6 @@ class MathEditorModule {
     }
 
 
-    handleTextChange(delta, oldDelta, source) {
-        if(source !== 'user') return;
-        console.log("text changed", delta, this)
-
-        let quill = this.quill;
-        if (!quill.getSelection()) return;
-
-        let blot = quill.getLeaf(quill.getSelection().index)[0]
-        //  ;
-        let blotName = blot.parent.constructor.blotName
-        // console.log(blotName)
-        if (blotName === 'inlinetex' || blotName === 'code-block') {
-            let isInline = blotName === 'inlinetex'
-            //  ;
-            let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-            // let blot = quill.getLeaf(begin)
-
-
-            let formula = blot.text;
-            //  ;
-            tooltip.show()
-
-            if (!isInline) {
-                // tooltip.root.style.width = "100%"
-                tooltip.root.classList.add('fullwidth')
-
-                // let bounds = quill.getBounds(quill.getSelection().index);
-                let blot = getBlot();
-                //  ;
-                let bounds = quill.getBounds(
-                    blot.text.length + quill.getIndex(blot)
-                );
-                //  ;
-                console.log(bounds)
-                formula = String.raw`
-                        \displaylines{ ${formula} }
-                    `
-
-                console.log(formula)
-
-
-                tooltip.root.style.top = `${bounds.bottom}px`;
-                tooltip.root.style.left = `0px`;
-
-                // tooltip.root.style.left = `${bounds.left}px`;
-            } else {
-                if (tooltip.root.classList.contains('fullwidth')) {
-                    tooltip.root.classList.remove('fullwidth')
-                }
-                //  ;
-                let bounds = quill.getBounds(quill.getIndex(getBlot()));
-
-                console.log(bounds)
-
-
-                tooltip.root.style.top = `${bounds.bottom}px`;
-                tooltip.root.style.left = `${bounds.left}px`;
-            }
-
-            let typesetted = MathJax.tex2svg(formula);
-            tooltip.root.innerHTML = `
-                    <span class="ql-tooltip-arrow"></span>
-                    ${typesetted.outerHTML}
-                `;
-        }
-    }
-
     // This implements the 'click away' feature that automatically
     // typesets latex source code into mathjax block.
     handleSelectionChange(range, oldRange, source) {
@@ -718,92 +726,6 @@ class MathEditorModule {
         };
     }
 
-}
-
-
-class InlineTexEditor extends InlineEmbed {
-    static blotName = INLINE_TEX_EDITOR_CLASSNAME
-    static className = INLINE_TEX_EDITOR_CLASSNAME
-    static tagName = 'div';
-    static create(value = ""){
-
-        //  ;
-        let node = super.create();
-        var node_wrappernode = document.createElement("div")
-
-        node_wrappernode.classList.add("inline-editor-wrapper")
-        node.appendChild(node_wrappernode)
-
-
-        node.setAttribute("latex", value)
-        node.setAttribute("isInlineTexEditor", true)
-        node.style.display = "inline" // todo moe this to a css file
-
-        node_wrappernode.style.display = "inline-block"
-        node_wrappernode.style["vertical-align"] = "middle";
-        node_wrappernode.style.width = "1px"; // default width
-
-        window.node_wrappernode = node_wrappernode
-
-
-
-
-
-        return node
-    }
-
-    static value(node){
-        return node.getAttribute("latex")
-    }
-
-}
-
-class BlockTexEditor extends BlockEmbed{
-    static blotName = BLOCK_TEX_EDITOR_CLASSNAME;
-    static tagName = 'div';
-    static className = BLOCK_TEX_EDITOR_CLASSNAME
-
-    // constructor() {
-    //     super();
-    // }
-
-    /**
-     *
-     * @param value{String} latex source code
-     * @returns {*}
-     */
-    static create(value=""){
-        let node = super.create();
-        // TODO
-        node.setAttribute("latex", value)
-        node.setAttribute("isBlockTexEditor", true)
-        return node
-    }
-
-    static value(node){
-        return node.getAttribute("latex")
-    }
-
-    // This method hooks up the keybindings to this embed.
-    formats(){
-        let res = {}
-        res[FORMAT_BLOCKTEXEDIT] = true
-        return res
-    }
-
-    // format(name, value){
-    //      ;
-    //
-    // }
-
-
-}
-
-
-class BlockWrapper extends Block {
-    static blotName = 'blockwrapper'
-    static tagName = 'div'
-    static className = 'blockwrapper'
 }
 
 
