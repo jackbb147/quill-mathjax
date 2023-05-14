@@ -159,9 +159,24 @@ class MathEditorModule {
      */
     insertBlockTexEditor(index, latex) {
         // quill.insertText(begin, formula, attr)
+        let _ = this,
+            quill = _.quill;
         let res = quill.insertEmbed(index, BLOCK_TEX_EDITOR_CLASSNAME, true, Quill.sources.USER);
         // == ========= editor stuff
         let editor = this.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
+        setTimeout(function () {
+            // editor.setValue("")
+            // debugger;
+            editor.focus()
+            let index = quill.getSelection().index;
+            let aceDomNode = quill.getLeaf(index)[0].domNode.getElementsByClassName("ace_content")[0]
+            _.lastClickedIndex = index;
+            _.clicked = aceDomNode;
+            _.clickedInlineTexEditor = false;
+            _.clickedBlockTexEditor = true;
+
+
+        }, 0);
     }
 
     /**
@@ -170,6 +185,8 @@ class MathEditorModule {
      */
     insertInlineTexEditor(index, latex) {
         //  ;
+        let _ = this;
+        let quill = this.quill;
         let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
         this.configureACEEditor(node_wrappernode, latex, true)
 
@@ -177,7 +194,17 @@ class MathEditorModule {
         //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
         setTimeout(function () {
             // editor.setValue("")
+            // debugger;
             editor.focus()
+            let index = quill.getSelection().index;
+            // quill.setSelection(index + 1);
+            let aceDomNode = quill.getLeaf(index+1)[0].contentNode.getElementsByClassName("ace_content")[0]
+            _.lastClickedIndex = index;
+            _.clicked = aceDomNode;
+            _.clickedInlineTexEditor = true;
+            _.clickedBlockTexEditor = false;
+
+
         }, 0);
     }
 
