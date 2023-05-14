@@ -65,13 +65,13 @@ Quill.register(InlineMathDisplay);
 
 Quill.register('modules/MathEditorModule', MathEditorModule)
 
-let enterHandler = new EnterHandlerClass();
+
 
 let quill = new Quill('#editor-container', {
     theme: "bubble",
     modules:{
         MathEditorModule: {
-            enterHandler
+
         },
         toolbar: [
             [{ header: [1, 2, false] }],

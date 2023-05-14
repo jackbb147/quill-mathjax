@@ -178,8 +178,6 @@ class InlineMathDisplay extends MathDisplayBlot(InlineEmbed) { // supposed to be
 }
 
 
-
-
 // TODO remove this ...
 
 class MyToolTip extends Tooltip {
@@ -197,13 +195,11 @@ class MyToolTip extends Tooltip {
 }
 
 
-
-
 class MathEditorModule {
     constructor(quill, options) {
-        if (!options.hasOwnProperty('enterHandler')) {
-            throw new Error('No enterHandler supplied. ')
-        }
+        // if (!options.hasOwnProperty('enterHandler')) {
+        //     throw new Error('No enterHandler supplied. ')
+        // }
         this.quill = quill;
         this.tooltip = new MyToolTip(quill);
         this.options = options;
@@ -241,9 +237,7 @@ class MathEditorModule {
 
         this.tooltip.root.classList.add("math-tooltip")
         window.quill = quill;
-        let enterHandler = options.enterHandler;
-        enterHandler.setQuillInstance(this.quill)
-        enterHandler.setTooltipInstance(this.tooltip)
+
 
     }
     // for inline ace editor auto resizing
@@ -598,7 +592,6 @@ class MathEditorModule {
             // ||
             // (isInlineTex(blotOld) && !isInlineTex(blotNew))
         ) {
-            // let wasInline = isInlineTex(blotOld)
             console.log("you exited inline or block tex.", blotOld)
             //  ;
             let editor = blotOld.domNode.env.editor;
@@ -613,7 +606,7 @@ class MathEditorModule {
         }else if ((isInlineTex(blotOld) && !isInlineTex(blotNew))){
             // alert("hey!")
         }
-        // console.log(blotOld, oldRange.index, blotNew, range.index, source)
+
 
     }
 
@@ -728,29 +721,6 @@ class MathEditorModule {
 }
 
 
-class EnterHandlerClass {
-    constructor() {
-
-    }
-
-    setQuillInstance(quill) {
-        this.quill = quill;
-    }
-
-    setTooltipInstance(tooltip) {
-        this.tooltip = tooltip;
-    }
-
-    /**
-     *
-     * @param enterHandler
-     * @param isInline
-     * @return {f}
-     */
-
-
-}
-
 class InlineTexEditor extends InlineEmbed {
     static blotName = INLINE_TEX_EDITOR_CLASSNAME
     static className = INLINE_TEX_EDITOR_CLASSNAME
@@ -845,4 +815,4 @@ window.InlineMathDisplay = InlineMathDisplay
 window.BlockMathDisplay = BlockMathDisplay
 window.MyToolTip = MyToolTip
 window.MathEditorModule = MathEditorModule;
-window.EnterHandlerClass = EnterHandlerClass
+
