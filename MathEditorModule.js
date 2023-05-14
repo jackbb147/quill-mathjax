@@ -258,10 +258,7 @@ class MathEditorModule {
 
         //  ;
         // editor.setAutoScrollEditorIntoView(true);
-
         editor.completers.push(staticWordCompleter)
-
-
         window.editor = editor;
 
         editor.commands.addCommand({
@@ -275,24 +272,24 @@ class MathEditorModule {
         });
 
         let quill = this.quill, tooltip = this.tooltip
+        this.__set_up_live_preview(editor, isInline)
+        editor.insert(formula)
+        return editor;
+    }
 
+    __set_up_live_preview(editor, isInline){
+        let tooltip = this.tooltip;
+        let quill = this.quill;
         editor.session.on("change", (delta) => {
 
             let formula = editor.getValue()
 
             tooltip.show() //todo refactor this
-
-            // if (!isInline) {
-            // tooltip.root.style.width = "100%"
             tooltip.root.classList.add('fullwidth')
-
-            //  ;
-            // TODO  =========
             let bounds = quill.getBounds(
                 formula.length + quill.getSelection().index
             );
             //  ;
-            console.log(bounds)
             formula = String.raw`
                     \displaylines{ ${formula} }
                 `
@@ -310,16 +307,8 @@ class MathEditorModule {
 
                 this.updateSize(null, editor.renderer)
                 editor.focus()
-                // editor.getSession()._emit('change', {start:{row:0,column:0},end:{row:0,column:0},action:'insert',lines: []})
             }
-
-
         })
-
-        editor.insert(formula)
-
-
-        return editor;
     }
 
     getConvertEditorToMathHandler(isInline = false) {
