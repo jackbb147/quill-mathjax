@@ -119,6 +119,10 @@ class MathEditorModule {
             this.clickedBlockTexEditor = isBlockTexEditor
             this.lastClickedIndex = quill.getSelection().index
         })
+
+        // quill.root.addEventListener("keydown", event => {
+        //     debugger;
+        // })
         // TODO some refactoring needed..
         this.tooltip.root.classList.add("math-tooltip")
 
@@ -217,18 +221,14 @@ class MathEditorModule {
      * @param isInline {Boolean}
      */
     configureACEEditor(node, formula = "", isInline = false) {
-        // var editorNode = document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0]
         var editorNode = node
-
         // debugger
         var editor = ace.edit(editorNode);
-        var langTools = ace.require("ace/ext/language_tools");
-        // editor.focus()
+        ace.require("ace/ext/language_tools");
         editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
         editor.setTheme("ace/theme/monokai");
         editor.session.setMode("ace/mode/latex");
         editor.focus()
-
         editor.setOptions({
             showGutter: !isInline,
             enableBasicAutocompletion: true,
@@ -236,21 +236,13 @@ class MathEditorModule {
             enableLiveAutocompletion: true,
             maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
         });
-        editor.setFontSize(15)
+        editor.setFontSize(15) //TODO don't hardcode this...
         editor.renderer.updateCharacterSize()
-
         this.__set_up_editor_completer(editor)
-
-        //  ;
-        // editor.setAutoScrollEditorIntoView(true);
-
-        window.editor = editor;
-
         this.__set_editor_commands(editor, isInline)
-
-        let quill = this.quill, tooltip = this.tooltip
         this.__set_up_live_preview(editor, isInline)
         editor.insert(formula)
+        window.editor = editor;
         return editor;
     }
 
@@ -274,6 +266,7 @@ class MathEditorModule {
     }
 
     __set_editor_commands(editor, isInline){
+        let quill = this.quill, tooltip = this.tooltip
         editor.commands.addCommand({
             name: 'myCommand',
             bindKey: {win: 'Ctrl-enter', mac: 'Command-enter'},
@@ -283,6 +276,38 @@ class MathEditorModule {
             // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
             // scrollIntoView: "cursor", control how cursor is scolled into view after the command
         });
+
+
+
+        // debugger
+        // editor.container.addEventListener("keydown", e=>{
+        //     debugger
+        // })
+        editor.commands.addCommand({
+            name: 'deleteMe',
+            bindKey: {win: 'backspace', mac: 'backspace'},
+            exec: function(editor){
+                // debugger;
+                // editor.removeWordLeft()
+                let value = editor.getValue()
+                console.log(value)
+                if(value.length === 0){
+                    // user wants to delete the editor box ...
+                    // debugger;
+                    let index = quill.getSelection().index;
+                    quill.deleteText(index, 1)
+                    tooltip.hide()
+
+                }
+
+                return false; // must return false in order to fire the default event:https://stackoverflow.com/a/42020190/21646295
+                // if(value.length === 0){
+                //     debugger
+                //     let index = quill.getSelection().index;
+                // }
+
+            }
+        })
     }
 
     __set_up_live_preview(editor, isInline){
@@ -301,9 +326,6 @@ class MathEditorModule {
             formula = String.raw`
                     \displaylines{ ${formula} }
                 `
-
-            console.log(formula)
-
 
             tooltip.root.style.top = `${bounds.bottom}px`;
             // =============
@@ -422,11 +444,13 @@ class MathEditorModule {
                     return true;
                 }
             },
-            backspace: {
+            backspace: { //todo remove this because it's not necessary i think
                 key: 'backspace',
-                format: ['inlinetex', 'code-block'],
                 handler: function (range, context) {
-                    let quill = this.quill
+                    let quill = this.quill,
+                        matheditormodule = quill.getModule("MathEditorModule"),
+                        tooltip = matheditormodule.tooltip
+                    // debugger;
                     console.log("hey!")
                     console.log("backspace pressed while editing latex. ", range, context)
                     let prefix = context.prefix;
@@ -436,13 +460,13 @@ class MathEditorModule {
                             // User is about to exit formula editor  ...
                             console.log("hey! You wanna delete me?")
                             quill.removeFormat(quill.getSelection().index)
-                            _.tooltip.hide()
+                            tooltip.hide()
                         }
                     } else {
                         if (prefix.length < 2) {
                             // User is about to exit formula editor  ...
                             console.log("hey! You wanna delete me?")
-                            _.tooltip.hide()
+                            tooltip.hide()
                         }
                     }
 
