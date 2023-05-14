@@ -228,6 +228,33 @@ class MathEditorModule {
         editor.setTheme("ace/theme/monokai");
         editor.session.setMode("ace/mode/latex");
         editor.focus()
+
+        editor.setOptions({
+            showGutter: !isInline,
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+        });
+        editor.setFontSize(15)
+        editor.renderer.updateCharacterSize()
+
+        this.__set_up_editor_completer(editor)
+
+        //  ;
+        // editor.setAutoScrollEditorIntoView(true);
+
+        window.editor = editor;
+
+        this.__set_editor_commands(editor, isInline)
+
+        let quill = this.quill, tooltip = this.tooltip
+        this.__set_up_live_preview(editor, isInline)
+        editor.insert(formula)
+        return editor;
+    }
+
+    __set_up_editor_completer(editor){
         var staticWordCompleter = {
             getCompletions: function (editor, session, pos, prefix, callback) {
                 // var wordList = [String.raw `\foo`, "bar", "baz"];
@@ -243,30 +270,7 @@ class MathEditorModule {
             }
         }
 
-        editor.setOptions({
-            showGutter: !isInline,
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true,
-            maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
-
-            // fontSize: EDITOR_CONTAINER_FONTSIZE
-
-        });
-        editor.setFontSize(15)
-        editor.renderer.updateCharacterSize()
-
-        //  ;
-        // editor.setAutoScrollEditorIntoView(true);
         editor.completers.push(staticWordCompleter)
-        window.editor = editor;
-
-        this.__set_editor_commands(editor, isInline)
-
-        let quill = this.quill, tooltip = this.tooltip
-        this.__set_up_live_preview(editor, isInline)
-        editor.insert(formula)
-        return editor;
     }
 
     __set_editor_commands(editor, isInline){
