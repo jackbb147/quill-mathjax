@@ -615,12 +615,12 @@ class MathEditorModule {
 
     }
 
-    getBindings() {
+    static getBindings() {
         return {
             // https://quilljs.com/docs/modules/keyboard/
             startBlockMathEdit:{
                 key: 'enter',
-                handler: (range, context)=> {
+                handler: function(range, context){
                     // alert("hey!")
                     let quill = this.quill;
                     let math_editor_module = this.quill.getModule("MathEditorModule");
@@ -651,7 +651,7 @@ class MathEditorModule {
             backspace: {
                 key: 'backspace',
                 format: ['inlinetex', 'code-block'],
-                handler: (range, context)=>{
+                handler: function(range, context){
                     let quill = this.quill
                     console.log("hey!")
                     console.log("backspace pressed while editing latex. ",range, context)
@@ -679,8 +679,9 @@ class MathEditorModule {
             dollarSign: {
                 key: 52,
                 shiftKey: true,
-                handler: ()=>{
+                handler: function(range, context){
                     console.log("hey! dollar sign pressed")
+                    // debugger
                     let quill = this.quill;
                     let math_editor_module = this.quill.getModule("MathEditorModule");
                     if(!math_editor_module) throw new Error("No math editor module instance found. ")
@@ -770,114 +771,6 @@ class EnterHandlerClass {
             tooltip.hide()
         }
         return f
-    }
-
-    getBindings() {
-        return {
-            // https://quilljs.com/docs/modules/keyboard/
-            startBlockMathEdit:{
-                key: 'enter',
-                handler: (range, context)=> {
-                    // alert("hey!")
-                    let quill = this.quill;
-                    let math_editor_module = this.quill.getModule("MathEditorModule");
-                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
-                    let prefix = context.prefix;
-                    let lastTwo = prefix.slice(-2);
-                    let index = range.index;
-                    let offset = context.offset;
-                    console.log("Hey, you pressed enter. ", range, context, lastTwo, quill.getLine(index))
-
-                    if(lastTwo === '$$'){
-                        if(offset === 2){
-                            quill.deleteText(index-2, 2)
-                            math_editor_module.insertBlockTexEditor(index-2, "")
-                        }else{
-                            // alert("hey! no!")
-                            quill.deleteText(index-2, 2)
-                            index = index - 2;
-                            quill.insertText(index, `\n`)
-                            math_editor_module.insertBlockTexEditor(index + 1, "")
-                        }
-                        return false;
-                    }
-                    return true;
-                }
-            },
-            backspace: {
-                key: 'backspace',
-                format: ['inlinetex', 'code-block'],
-                handler: (range, context)=>{
-                    let quill = this.quill
-                    console.log("hey!")
-                    console.log("backspace pressed while editing latex. ",range, context)
-                    let prefix = context.prefix;
-                    if(context.format.hasOwnProperty("code-block")){
-
-                        if(prefix.length < 1){
-                            // User is about to exit formula editor  ...
-                            console.log("hey! You wanna delete me?")
-                            quill.removeFormat(quill.getSelection().index)
-                            _.tooltip.hide()
-                        }
-                    }else{
-                        if(prefix.length < 2){
-                            // User is about to exit formula editor  ...
-                            console.log("hey! You wanna delete me?")
-                            _.tooltip.hide()
-                        }
-                    }
-
-                    return true;
-                }
-            },
-
-            dollarSign: {
-                key: 52,
-                shiftKey: true,
-                handler: ()=>{
-                    console.log("hey! dollar sign pressed")
-                    let quill = this.quill;
-                    let math_editor_module = this.quill.getModule("MathEditorModule");
-                    if(!math_editor_module) throw new Error("No math editor module instance found. ")
-                    let index = quill.getSelection().index;
-                    quill.insertText(index, '$$')
-                    quill.setSelection(index+1)
-
-                    quill.once('text-change', (delta, oldDelta, source)=>{
-                        console.log("hey!")
-                        console.log(delta, oldDelta, source)
-                        // debugger
-                        let ops1 = delta.ops[1]; // todo change this name...
-
-                        if(ops1.hasOwnProperty("insert")){
-                            let formula = ops1.insert
-                            // alert("hey! you wanna edit latex?")
-
-                            // debugger;
-                            quill.deleteText(index, 3)
-                            // debugger
-                            math_editor_module.insertInlineTexEditor(index, formula)
-
-
-                            // quill.setSelection(index+1)
-                            // return false
-
-                            // let text =  ' ' + ops1.insert;
-                            // quill.deleteText(index, 2 + text.length)
-                            // //  ;
-                            // quill.insertText(index, text, {'inlinetex': true})
-                            // quill.setSelection(index+2)
-                        }else if(ops1.hasOwnProperty("delete")){
-                            console.log("hey! you dont wanna edit latex anymore?")
-                            quill.deleteText(index, 1)
-                        }
-                    })
-
-
-                }
-            },
-        };
     }
 
 }

@@ -80,7 +80,8 @@ let quill = new Quill('#editor-container', {
         ],
         keyboard:
             {
-            bindings: enterHandler.getBindings()
+            // bindings: enterHandler.getBindings()
+                bindings: MathEditorModule.getBindings()
         }
     }
 });
