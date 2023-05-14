@@ -300,9 +300,6 @@ class MathEditorModule {
      * @param isInline {Boolean}
      */
     static configureACEEditor(node, formula="", isInline = false){
-        //  ;
-
-        //
         // var editorNode = document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0]
         var editorNode = node
 
@@ -667,12 +664,13 @@ class EnterHandlerClass {
         let _ = this;
 
         return {
+            // https://quilljs.com/docs/modules/keyboard/
             // TODO is there a way to somehow propagate the keyboard event from the ace editor up to the enclosing quill instance?
             startBlockMathEdit:{
                 key: 'enter',
-                handler: (range, context)=>{
+                handler: (range, context)=> {
                     // alert("hey!")
-                    let quill = _.quill;
+                    let quill = this.quill;
                     let prefix = context.prefix;
                     let lastTwo = prefix.slice(-2);
                     let index = range.index;
@@ -680,10 +678,7 @@ class EnterHandlerClass {
                     console.log("Hey, you pressed enter. ", range, context, lastTwo, quill.getLine(index))
 
                     if(lastTwo === '$$'){
-
                         if(offset === 2){
-                            //  
-                            // quill.format('code-block', true)
                             quill.deleteText(index-2, 2)
                             MathEditorModule.insertBlockTexEditor(index-2, "")
 
@@ -704,6 +699,7 @@ class EnterHandlerClass {
                 key: 'backspace',
                 format: ['inlinetex', 'code-block'],
                 handler: (range, context)=>{
+                    let quill = this.quill
                     console.log("hey!")
                     console.log("backspace pressed while editing latex. ",range, context)
                     let prefix = context.prefix;
@@ -732,6 +728,7 @@ class EnterHandlerClass {
                 shiftKey: true,
                 handler: ()=>{
                     console.log("hey! dollar sign pressed")
+                    let quill = this.quill;
                     let index = quill.getSelection().index;
                     quill.insertText(index, '$$')
                     quill.setSelection(index+1)
@@ -769,51 +766,6 @@ class EnterHandlerClass {
 
                 }
             },
-            // startInlineMathEdit: {
-            //     key: 52,
-            //     shiftKey: true,
-            //     handler: ()=>{
-            //         alert("hey! dollar sign pressed")
-            //     //     // return true;
-            //     // //     TODO
-            //     //     let index = _.quill.getSelection().index;
-            //     //     let quill = _.quill;
-            //     //     quill.insertText(index, '$$')
-            //     //     quill.setSelection(index+1)
-            //     //
-            //     //
-            //     //     // var res = true;
-            //     //     quill.once('text-change', (delta, oldDelta, source)=>{
-            //     //         console.log("hey!")
-            //     //         console.log(delta, oldDelta, source)
-            //     //
-            //     //         let ops1 = delta.ops[1]; // todo change this name...
-            //     //
-            //     //         if(ops1.hasOwnProperty("insert")){
-            //     //             console.log("hey! you wanna edit latex?")
-            //     //             let text =  ' ' + ops1.insert;
-            //     //             quill.deleteText(index, 2 + text.length)
-            //     //             //  ;
-            //     //             quill.insertText(index, text, {'inlinetex': true})
-            //     //             quill.setSelection(index+2)
-            //     //         }else if(ops1.hasOwnProperty("delete")){
-            //     //             console.log("hey! you dont wanna edit latex anymore?")
-            //     //             quill.deleteText(index, 1)
-            //     //         }
-            //     //     })
-            //
-            //
-            //
-            //     }
-            // }
-            // left: {
-            //     key: 37,
-            //     handler: (range, context)=>{
-            //         console.log("left pressed", range, context)
-            //
-            //         return true;
-            //     }
-            // }
         };
     }
 
