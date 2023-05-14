@@ -262,7 +262,8 @@ class MathEditorModule {
 
 
     /**
-     * insert an ACE editor at the specified index.
+     * TODO this doesnt have to be static
+     * insert an ACE editor at the specified index of the quill instance.
      * @param index
      * @param latex the default text input to feed into the editor
      */
@@ -273,6 +274,11 @@ class MathEditorModule {
         let editor = MathEditorModule.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
     }
 
+    /**
+     * TODO this doesnt have to be static.
+     * @param index
+     * @param latex
+     */
     static insertInlineTexEditor(index, latex){
         //  ;
         let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
@@ -290,7 +296,6 @@ class MathEditorModule {
 
 
     /**
-     * TODO refactor this ...
      * @param formula
      * @param isInline {Boolean}
      */
@@ -350,7 +355,6 @@ class MathEditorModule {
 
         editor.commands.addCommand({
             name: 'myCommand',
-            // bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
             bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
             // TODO modify this for inline
             exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler, isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
@@ -431,6 +435,12 @@ class MathEditorModule {
     }
 
 
+    /**
+     * todo this doesnt have to be static.
+     * @param blockMathNode
+     * @param quill
+     * @param attr
+     */
     static replaceBlockMathWithBlockEdit(blockMathNode, quill, attr ){
         //  ;
         let node = blockMathNode
@@ -459,7 +469,12 @@ class MathEditorModule {
     }
 
 
-
+    /**
+     * todo this doesnt have to be static
+     * @param mathnode
+     * @param quill
+     * @param attr
+     */
     static replaceInlineMathWithInlineEdit(mathnode, quill, attr ){
         //  ;
         let node = mathnode
@@ -487,6 +502,7 @@ class MathEditorModule {
             `;
     }
 
+    // todo this doesnt have to be static
     handleTextChange(delta, oldDelta, source) {
         if(source !== 'user') return;
         console.log("text changed", delta, this)
@@ -594,7 +610,7 @@ class MathEditorModule {
             tooltip.hide()
 
         }else if ((isInlineTex(blotOld) && !isInlineTex(blotNew))){
-            alert("hey!")
+            // alert("hey!")
         }
         // console.log(blotOld, oldRange.index, blotNew, range.index, source)
 
@@ -615,65 +631,36 @@ class EnterHandlerClass {
         this.tooltip = tooltip;
     }
 
+    /**
+     *
+     * @param enterHandler
+     * @param isInline
+     * @return {f}
+     */
     static getConvertEditorToMathHandler(enterHandler, isInline = false){
         let _ = enterHandler;
         /**
          *
          * @param editor
          */
+        /**
+         * replace an editor block with a typesetted math displayer block by
+         * deleting and then inserting.
+         * @param editor
+         */
         let f = (editor) => {
-
-            //  ;
-
             let quill = _.quill
             let tooltip = _.tooltip;
             // TODO get the right formula
             let formula = editor.getValue() //todo
-            console.log("hey! you wanna typeset the formula? ")
-            //  ;
-            console.log(formula)
-
-            let count = formula.length;
-
+            console.log("hey! you wanna typeset the formula? ", formula)
             let indexOfEditor = quill.getSelection().index;
+            //
             quill.deleteText(indexOfEditor, 1)
-
-            //  ;
-            // debugger
             quill.insertEmbed(indexOfEditor, isInline ? "mathbox-inline" : "mathbox-block", formula, "silent");
             tooltip.hide()
         }
         return f
-    }
-
-    // TODO rename this
-    getHandler(name) {
-        //
-        let _ = this;
-        let f = (range, context) => {
-            //     TODO
-            //  ;
-
-            let quill = _.quill,
-                tooltip = _.tooltip;
-            let formula = context.prefix + context.suffix;
-
-            console.log("hey! you wanna typeset the formula? ")
-            //  ;
-            console.log(formula)
-
-            let begin = range.index - context.prefix.length;
-            let count = formula.length;
-
-            //  ;
-            quill.removeFormat(begin)
-            quill.deleteText(begin, count, "silent")
-
-            quill.insertEmbed(begin, name, formula, "silent");
-            tooltip.hide()
-        }
-
-        return f;
     }
 
     getBindings() {
@@ -681,26 +668,6 @@ class EnterHandlerClass {
 
         return {
             // TODO is there a way to somehow propagate the keyboard event from the ace editor up to the enclosing quill instance?
-            // blocktexEdit: {
-            //     key: "enter",
-            //     metaKey: true,
-            //     format: [FORMAT_BLOCKTEXEDIT],
-            //     handler: (range, context)=>{
-            //         alert("hey from quill!")
-            //     }
-            // },
-            // cmd_enter: {
-            //     key: 'enter',
-            //     metaKey: true,
-            //     format: ['code-block'],
-            //     handler: _.getHandler('mathbox-block')
-            // },
-            // enter: {
-            //     key: 'enter',
-            //     format: ['inlinetex'],
-            //     metaKey: null,
-            //     handler: _.getHandler('mathbox-inline')
-            // },
             startBlockMathEdit:{
                 key: 'enter',
                 handler: (range, context)=>{
@@ -850,8 +817,8 @@ class EnterHandlerClass {
         };
     }
 
-
 }
+
 class InlineTexEditor extends InlineEmbed {
     static blotName = INLINE_TEX_EDITOR_CLASSNAME
     static className = INLINE_TEX_EDITOR_CLASSNAME
@@ -888,8 +855,6 @@ class InlineTexEditor extends InlineEmbed {
     }
 
 }
-
-
 
 class BlockTexEditor extends BlockEmbed{
     static blotName = BLOCK_TEX_EDITOR_CLASSNAME;
