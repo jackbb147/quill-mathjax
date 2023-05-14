@@ -201,15 +201,16 @@ class MyToolTip extends Tooltip {
 
 class MathEditorModule {
     constructor(quill, options) {
-
         if (!options.hasOwnProperty('enterHandler')) {
             throw new Error('No enterHandler supplied. ')
         }
         this.quill = quill;
+        this.tooltip = new MyToolTip(quill);
         this.options = options;
         this.clicked = null; // a dom node
         this.clickedInlineTexEditor = false // whether the domNode is an inline tex editor
         this.lastClickedIndex  = null;  //index of the last clicked item
+
         quill.root.addEventListener("click", ev => {
             // debugger
             let clicked = ev.target, lastClicked = this.clicked
@@ -224,7 +225,7 @@ class MathEditorModule {
                 let count = 1
                 quill.deleteText(begin, count, 'silent')
                 quill.insertEmbed(begin,  'mathbox-inline', formula, Quill.sources.USER);
-                tooltip.hide()
+                this.tooltip.hide()
             }
 
             // debugger
@@ -237,21 +238,16 @@ class MathEditorModule {
         quill.on('selection-change', this.handleSelectionChange.bind(this))
         quill.on("text-change", this.handleTextChange.bind(this))
 
-        let tooltip = new MyToolTip(quill);
-        tooltip.root.classList.add("math-tooltip")
 
-
-        window.tooltip = tooltip
+        this.tooltip.root.classList.add("math-tooltip")
         window.quill = quill;
-
-
         let enterHandler = options.enterHandler;
-        enterHandler.setQuillInstance(quill)
-        enterHandler.setTooltipInstance(tooltip)
+        enterHandler.setQuillInstance(this.quill)
+        enterHandler.setTooltipInstance(this.tooltip)
 
     }
-// for inline ace editor auto resizing
-// numChars: number of characters. If undefined, use renderer.characterWidth
+    // for inline ace editor auto resizing
+    // numChars: number of characters. If undefined, use renderer.characterWidth
     updateSize(e, renderer, numChars) {
         // debugger
         var text = renderer.session.getLine(0);
@@ -299,8 +295,6 @@ class MathEditorModule {
     }
 
 
-
-
     /**
      * @param formula
      * @param isInline {Boolean}
@@ -342,9 +336,6 @@ class MathEditorModule {
             // fontSize: EDITOR_CONTAINER_FONTSIZE
 
         });
-
-        //
-
         editor.setFontSize(15)
         editor.renderer.updateCharacterSize()
 
@@ -360,24 +351,17 @@ class MathEditorModule {
             name: 'myCommand',
             bindKey: {win: 'Ctrl-enter',  mac: 'Command-enter'},
             // TODO modify this for inline
-            exec: EnterHandlerClass.getConvertEditorToMathHandler(enterHandler, isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
+            exec: this.getConvertEditorToMathHandler( isInline), //TODO refactor this to make sure this quill instance is the right one... especially when there is more than one quill editor in the page ...
             readOnly: true, // false if this command should not apply in readOnly mode
             // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
             // scrollIntoView: "cursor", control how cursor is scolled into view after the command
         });
 
-        editor.session.on("change", (delta)=>{
-            let quill = window.quill;
-            //  ;
-            // let isInline = blotName === 'inlinetex'
-            //  ;
-            // let begin = (blotName === 'inlinetex') ? delta.ops[0].retain : delta.ops[0].retain;
-            // let blot = quill.getLeaf(begin)
+        let quill = this.quill, tooltip = this.tooltip
 
-            //
-            // debugger;
+        editor.session.on("change", (delta)=>{
+
             let formula = editor.getValue()
-            //  ;
 
             tooltip.show() //todo refactor this
 
@@ -405,7 +389,6 @@ class MathEditorModule {
             let typesetted = MathJax.tex2svg(formula);
             tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
-            //  ;
             if(isInline){
 
                 this.updateSize(null, editor.renderer)
@@ -416,25 +399,43 @@ class MathEditorModule {
 
         })
 
-
-        // debugger
-        // editor.setValue(formula)
         editor.insert(formula)
 
 
-        // if(isInline){
-        //     //  ;
-        //     //
-        //     // editor.renderer.updateCharacterSize()
-        //     updateSize(null, editor.renderer, formula.length)
-        //     // editor.setValue(formula)
-        //
-        // }
+
 
 
 
 
         return editor;
+    }
+
+    getConvertEditorToMathHandler(isInline = false){
+        let _ = this;
+
+        /**
+         *
+         * @param editor
+         */
+        /**
+         * replace an editor block with a typesetted math displayer block by
+         * deleting and then inserting. Also hides the tooltip.
+         * @param editor
+         */
+        let f = (editor) => {
+            // debugger
+            let quill = _.quill
+            let tooltip = _.tooltip;
+            // TODO get the right formula
+            let formula = editor.getValue() //todo
+            console.log("hey! you wanna typeset the formula? ", formula)
+            let indexOfEditor = quill.getSelection().index;
+            //
+            quill.deleteText(indexOfEditor, 1)
+            quill.insertEmbed(indexOfEditor, isInline ? "mathbox-inline" : "mathbox-block", formula, "silent");
+            tooltip.hide()
+        }
+        return f
     }
 
 
@@ -573,11 +574,12 @@ class MathEditorModule {
     // typesets latex source code into mathjax block.
     handleSelectionChange(range, oldRange, source) {
         //  ;
-
+        // debugger
         // console.log("hey! ", range, oldRange, source)
         if (source !== 'user' || !range || !oldRange) return;
         let blotOld = getBlot(oldRange.index)
         let blotNew = getBlot(range.index)
+        let tooltip = this.tooltip
         let isBlockTex = (blot) => {
             //  ;
             return blot.statics.blotName === BLOCK_TEX_EDITOR_CLASSNAME
@@ -718,8 +720,6 @@ class MathEditorModule {
                             quill.deleteText(index, 1)
                         }
                     })
-
-
                 }
             },
         };
@@ -747,31 +747,7 @@ class EnterHandlerClass {
      * @param isInline
      * @return {f}
      */
-    static getConvertEditorToMathHandler(enterHandler, isInline = false){
-        let _ = enterHandler;
-        /**
-         *
-         * @param editor
-         */
-        /**
-         * replace an editor block with a typesetted math displayer block by
-         * deleting and then inserting.
-         * @param editor
-         */
-        let f = (editor) => {
-            let quill = _.quill
-            let tooltip = _.tooltip;
-            // TODO get the right formula
-            let formula = editor.getValue() //todo
-            console.log("hey! you wanna typeset the formula? ", formula)
-            let indexOfEditor = quill.getSelection().index;
-            //
-            quill.deleteText(indexOfEditor, 1)
-            quill.insertEmbed(indexOfEditor, isInline ? "mathbox-inline" : "mathbox-block", formula, "silent");
-            tooltip.hide()
-        }
-        return f
-    }
+
 
 }
 
@@ -852,8 +828,6 @@ class BlockTexEditor extends BlockEmbed{
 
 
 }
-
-
 
 
 class BlockWrapper extends Block {
