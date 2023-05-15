@@ -243,76 +243,8 @@ class MathEditorModule {
         this.__set_up_live_preview(editor, isInline)
         editor.insert(formula)
 
-
-
-        // editor.container.addEventListener("keydown", e=>{
-        //     console.log("hey! key down in editor. ")
-        //     let auto = document.getElementsByClassName("ace_autocomplete");
-        //
-        //     debugger;
-        //
-        // })
-
-
-
         // debugger;
-        // let editorBounds = editor.container.getBoundingClientRect();
         // // Options for the observer (which mutations to observe)
-        const config = {
-            childList: true, subtree: true,
-            attributes:    true,
-            attributeFilter: ["style"] };
-
-        // Callback function to execute when mutations are observed
-        const callback = (mutationList, observer) => {
-            // debugger;
-            for (const mutation of mutationList) {
-                // && mutation.addedNodes[0].classList.contains("ace_autocomplete")
-                // if( mutation.type === "attributes" && mutation.target.classList.contains("ace_autocomplete")){
-                //     // debugger;
-                // }
-                if (mutation.type === "childList"
-                    // /**/&&
-                    && ("addedNodes" in mutation)
-                    && mutation.addedNodes.length > 0
-                    && mutation.addedNodes[0].classList.contains("ace_autocomplete")
-                ) {
-
-                    let auto = mutation.addedNodes[0];
-                    // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
-                    const myObserver = new ResizeObserver(entries => {
-
-                        entries.forEach(entry => {
-                            console.log('width', entry.contentRect.width);
-                            console.log('height', entry.contentRect.height);
-                            let target = entry.target;
-                            // let height = entry.contentRect.height;
-                            let height = 100 // in pixels
-                            if(height != 0){
-                                // debugger;
-                                let bounds = editor.container.getBoundingClientRect()
-                                target.style.top = (bounds.y - 1.01 * height)+"px"
-                                target.style.height = height + "px"
-                            }
-
-                        });
-                    });
-
-                    myObserver.observe(auto);
-                    // let height = auto.style.height;
-                    // let height = "50px"
-                    // auto.style.top = "-20px"
-                    // // debugger;
-                    // console.log("An ace_autocomplete has been added or removed.");
-                }
-            }
-        };
-        //
-        // // Create an observer instance linked to the callback function
-        const observer = new MutationObserver(callback);
-
-        observer.observe(document.body, config )
-
 
 
 
@@ -338,6 +270,51 @@ class MathEditorModule {
 
         editor.completers.push(staticWordCompleter)
 
+
+        // make sure the auto complete pop up boxes are on top, instead of bottom
+        const config = {
+            childList: true, subtree: true,
+            attributes:    true,
+            attributeFilter: ["style"] };
+
+        const callback = (mutationList, observer) => {
+            // debugger;
+            for (const mutation of mutationList) {
+                if (mutation.type === "childList"
+                    // /**/&&
+                    && ("addedNodes" in mutation)
+                    && mutation.addedNodes.length > 0
+                    && mutation.addedNodes[0].classList.contains("ace_autocomplete")
+                ) {
+
+                    let auto = mutation.addedNodes[0];
+                    // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+                    // this is to override ACE's styling choices for the autocomplete pop up box.
+                    const myObserver = new ResizeObserver(entries => {
+
+                        entries.forEach(entry => {
+                            console.log('width', entry.contentRect.width);
+                            console.log('height', entry.contentRect.height);
+                            let target = entry.target;
+                            // let height = entry.contentRect.height;
+                            let height = 100 // in pixels todo don't hard code this..
+                            if(height != 0){
+                                // debugger;
+                                let bounds = editor.container.getBoundingClientRect()
+                                target.style.top = (bounds.y - 1.01 * height)+"px"
+                                target.style.height = height + "px"
+                            }
+
+                        });
+                    });
+
+                    myObserver.observe(auto);
+                }
+            }
+        };
+        const observer = new MutationObserver(callback);
+
+        observer.observe(document.body, config )
     }
 
     __set_editor_commands(editor, isInline){
