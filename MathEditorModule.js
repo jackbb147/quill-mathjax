@@ -2,7 +2,7 @@ const EDITOR_CONTAINER_FONTSIZE = "15px" // QUILL'S EDITOR_CONTAINER FONT SIZE M
 
 function getACEEditorInstance(domNode) {
 //     TODO
-//     debugger
+//
     var x = domNode
     while (!x.env || !x.env.editor) {
         x = x.parentNode
@@ -14,7 +14,7 @@ function getACEEditorInstance(domNode) {
 
 // returns true if the given node is an inlineTexEdit blot; false otherwise.
 function isInlineTexEditBlot(domNode) {
-//     debugger;
+//      ;
     try {
         let x = domNode
         let blot = Quill.find(x)
@@ -40,7 +40,7 @@ function isInlineTexEditBlot(domNode) {
 // returns true if the given node is a blockTexEdit blot; false otherwise.
 function isBlockTexEditBlot(domNode) {
 //     TODO
-//     debugger;
+//      ;
     try {
         let x = domNode
         let blot = Quill.find(x)
@@ -85,13 +85,13 @@ class MathEditorModule {
         this.lastClickedIndex = null;  //index of the last clicked item
 
         quill.root.addEventListener("click", ev => {
-            // debugger
+            //
             let clicked = ev.target, lastClicked = this.clicked
             let isInlineTexEditor = isInlineTexEditBlot(clicked);
             let isBlockTexEditor = isBlockTexEditBlot(clicked) //todo
             if (!isInlineTexEditor && this.clickedInlineTexEditor) {
                 // User is clicking away from an inline tex editor...
-                // debugger;
+                //  ;
                 let editor = getACEEditorInstance(lastClicked)
                 let formula = editor.getValue()
                 //  ;
@@ -122,7 +122,7 @@ class MathEditorModule {
         })
 
         // quill.root.addEventListener("keydown", event => {
-        //     debugger;
+        //      ;
         // })
         // TODO some refactoring needed..
         this.tooltip.root.classList.add("math-tooltip")
@@ -141,7 +141,7 @@ class MathEditorModule {
     // for inline ace editor auto resizing
     // numChars: number of characters. If undefined, use renderer.characterWidth
     updateSize(e, renderer, numChars) {
-        // debugger
+        //
         var text = renderer.session.getLine(0);
         var chars = renderer.session.$getStringScreenWidth(text)[0];
 
@@ -169,7 +169,7 @@ class MathEditorModule {
         // =========== editor stuff
         let editor = this.configureACEEditor(document.getElementsByClassName(BLOCK_TEX_EDITOR_CLASSNAME)[0], latex)
         setTimeout(function () {
-            // debugger;
+            //  ;
             editor.focus()
             let index = quill.getSelection().index;
             _.action("setClick", {index, isInline: false })
@@ -184,15 +184,21 @@ class MathEditorModule {
         //  ;
         let _ = this;
         let quill = this.quill;
+
+
+        // ----------------------------------------------------------------------------
         let res = quill.insertEmbed(index, INLINE_TEX_EDITOR_CLASSNAME, latex, Quill.sources.USER);
+
         this.configureACEEditor(node_wrappernode, latex, true)
+
 
         //  for some reason this must be done in order to avoid cursor being
         //  reset to the beginning of line. https://github.com/quilljs/quill/issues/731#issuecomment-326843147
         setTimeout(function () {
-            // debugger;
+            //  ;
             editor.focus()
             let index = quill.getSelection().index;
+
             _.action("setClick", {index, isInline: true})
         }, 0);
     }
@@ -202,7 +208,7 @@ class MathEditorModule {
             case "setClick":
                 // TODO
                 try{
-                    // debugger;
+                    //  ;
                     let quill = this.quill;
                     let isInline = param.isInline;
                     let index = param.index
@@ -222,14 +228,19 @@ class MathEditorModule {
      * @param isInline {Boolean}
      */
     configureACEEditor(node, formula = "", isInline = false) {
+        let quill = this.quill;
         var editorNode = node
-        // debugger
+        //
         var editor = ace.edit(editorNode);
         ace.require("ace/ext/language_tools");
         editor.setFontSize(EDITOR_CONTAINER_FONTSIZE) // todo refactor this
         editor.setTheme("ace/theme/monokai");
         editor.session.setMode("ace/mode/latex");
-        editor.focus()
+        // if(quill.getSelection().index === 0) console.trace()
+        let index = quill.getSelection().index;
+        editor.focus() // Bug here. calling editor.focus resets quill selection index to 0.
+        quill.setSelection(index);
+        if(quill.getSelection().index === 0) console.trace()
         editor.setOptions({
             showGutter: !isInline,
             enableBasicAutocompletion: true,
@@ -238,13 +249,17 @@ class MathEditorModule {
             maxLines: 40, //TODO change this as needed https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
         });
         editor.setFontSize(15) //TODO don't hardcode this...
+        // if(quill.getSelection().index === 0) console.trace()
         editor.renderer.updateCharacterSize()
+
+        // if(quill.getSelection().index === 0) console.trace()
         this.__set_up_editor_completer(editor)
         this.__set_editor_commands(editor, isInline)
         this.__set_up_live_preview(editor, isInline)
+
         editor.insert(formula)
 
-        // debugger;
+        //  ;
         // // Options for the observer (which mutations to observe)
 
 
@@ -279,7 +294,7 @@ class MathEditorModule {
             attributeFilter: ["style"] };
 
         const callback = (mutationList, observer) => {
-            // debugger;
+            //  ;
             for (const mutation of mutationList) {
                 if (mutation.type === "childList"
                     // /**/&&
@@ -300,7 +315,7 @@ class MathEditorModule {
                             // let height = entry.contentRect.height;
                             let height = 100 // in pixels todo don't hard code this..
                             if(height != 0){
-                                // debugger;
+                                //  ;
                                 let bounds = editor.container.getBoundingClientRect()
                                 target.style.top = (bounds.y - 1.01 * height)+"px"
                                 target.style.height = height + "px"
@@ -332,12 +347,12 @@ class MathEditorModule {
 
 
 
-        // debugger
+        //
         editor.commands.addCommand({
             name: 'deleteMe',
             bindKey: {win: 'backspace', mac: 'backspace'},
             exec: function(editor){
-                // debugger;
+                //  ;
                 let value = editor.getValue()
                 console.log(value)
                 if(value.length === 0){
@@ -365,7 +380,7 @@ class MathEditorModule {
                     if(cursorPosition.row === numLines - 1){
                         // user is pressing down arrow at the last line... so the user wants to exit
 
-                        // debugger;
+                        //  ;
                         convertEditorToMath(editor)
 
                     }
@@ -382,7 +397,7 @@ class MathEditorModule {
                     if(cursorPosition.row === 0){
                         // user is pressing up arrow at the first line... so the user wants to exit
 
-                        // debugger;
+                        //  ;
                         convertEditorToMath(editor)
 
                     }
@@ -396,31 +411,36 @@ class MathEditorModule {
     __set_up_live_preview(editor, isInline){
         let tooltip = this.tooltip;
         let quill = this.quill;
+         ;
         editor.session.on("change", (delta) => {
 
             let formula = editor.getValue()
 
+            // debugger;
             tooltip.show() //todo refactor this
 
             if(!isInline){
                 tooltip.root.classList.add('fullwidth')
             }
 
+             ;
             let bounds = quill.getBounds(
                 // formula.length + quill.getSelection().index
-                quill.getSelection().index
+                quill.getSelection().index //todo for some reason selection has been set to 0. This is the bug
             );
+
+
 
             // TODO delete this because it's not used
             let inlineBounds = editor.container.getBoundingClientRect()
-            // debugger;
+            //  ;
             //  ;
             formula = String.raw`
                     \displaylines{ ${formula} }
                 `
 
 
-            // debugger;
+            //  ;
             tooltip.root.style.top = `${bounds.bottom}px`;
             // =============
             tooltip.root.style.left = `${isInline ? bounds.left : 0}px`;
@@ -448,7 +468,7 @@ class MathEditorModule {
          * @param editor
          */
         let f = (editor) => {
-            // debugger
+            //
             let quill = _.quill
             let tooltip = _.tooltip;
             // TODO get the right formula
@@ -544,7 +564,7 @@ class MathEditorModule {
                     let quill = this.quill,
                         matheditormodule = quill.getModule("MathEditorModule"),
                         tooltip = matheditormodule.tooltip
-                    // debugger;
+                    //  ;
                     console.log("backspace pressed while editing latex. ", range, context)
                     let prefix = context.prefix;
                     if (context.format.hasOwnProperty("code-block")) {
@@ -572,7 +592,7 @@ class MathEditorModule {
                 shiftKey: true,
                 handler: function (range, context) {
                     console.log("hey! dollar sign pressed")
-                    // debugger
+                    //
                     let quill = this.quill;
                     let math_editor_module = this.quill.getModule("MathEditorModule");
                     if (!math_editor_module) throw new Error("No math editor module instance found. ")
@@ -583,27 +603,18 @@ class MathEditorModule {
                     quill.once('text-change', (delta, oldDelta, source) => {
                         console.log("hey!")
                         console.log(delta, oldDelta, source)
-                        // debugger
+                        //
                         let ops1 = delta.ops[1]; // todo change this name...
 
                         if (ops1.hasOwnProperty("insert")) {
                             let formula = ops1.insert
                             // alert("hey! you wanna edit latex?")
 
-                            // debugger;
+                            //  ;
                             quill.deleteText(index, 3)
-                            // debugger
+                            //
                             math_editor_module.insertInlineTexEditor(index, formula)
 
-
-                            // quill.setSelection(index+1)
-                            // return false
-
-                            // let text =  ' ' + ops1.insert;
-                            // quill.deleteText(index, 2 + text.length)
-                            // //  ;
-                            // quill.insertText(index, text, {'inlinetex': true})
-                            // quill.setSelection(index+2)
                         } else if (ops1.hasOwnProperty("delete")) {
                             console.log("hey! you dont wanna edit latex anymore?")
                             quill.deleteText(index, 1)
