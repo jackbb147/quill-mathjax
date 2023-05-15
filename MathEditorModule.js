@@ -360,18 +360,29 @@ class MathEditorModule {
             let formula = editor.getValue()
 
             tooltip.show() //todo refactor this
-            tooltip.root.classList.add('fullwidth')
+
+            if(!isInline){
+                tooltip.root.classList.add('fullwidth')
+            }
+
             let bounds = quill.getBounds(
-                formula.length + quill.getSelection().index
+                // formula.length + quill.getSelection().index
+                quill.getSelection().index
             );
+
+            // TODO delete this because it's not used
+            let inlineBounds = editor.container.getBoundingClientRect()
+            // debugger;
             //  ;
             formula = String.raw`
                     \displaylines{ ${formula} }
                 `
 
+
+            // debugger;
             tooltip.root.style.top = `${bounds.bottom}px`;
             // =============
-            tooltip.root.style.left = `0px`;
+            tooltip.root.style.left = `${isInline ? bounds.left : 0}px`;
             let typesetted = MathJax.tex2svg(formula);
             tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
