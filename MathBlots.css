@@ -23,3 +23,26 @@
 
     /*width: 1px; !*default width*!*/
 }
+
+/*debugger;*/
+/*let completer_dom_node = editor.container.getElementsByClassName("ace_autocomplete")[0] //TODO refactor this*/
+
+/*
+
+                                                                                   debugger;*/
+
+#editor-container {
+    /*display: none!important;*/
+    /*position: relative!important;*/
+    /*z-index: 20000000000;*/
+    /*overflow: hidden!important;*/
+}
+
+.ace_autocomplete {
+    /*height: 50px!important;*/
+    /*display: none;*/
+    /*position: absolute!important;*/
+    /*height: 60px!important;*/
+    /*top: 0px!important;*/
+    /*z-index: 0!important;*/
+}

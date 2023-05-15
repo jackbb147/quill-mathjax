@@ -242,6 +242,80 @@ class MathEditorModule {
         this.__set_editor_commands(editor, isInline)
         this.__set_up_live_preview(editor, isInline)
         editor.insert(formula)
+
+
+
+        // editor.container.addEventListener("keydown", e=>{
+        //     console.log("hey! key down in editor. ")
+        //     let auto = document.getElementsByClassName("ace_autocomplete");
+        //
+        //     debugger;
+        //
+        // })
+
+
+
+        // debugger;
+        // let editorBounds = editor.container.getBoundingClientRect();
+        // // Options for the observer (which mutations to observe)
+        const config = {
+            childList: true, subtree: true,
+            attributes:    true,
+            attributeFilter: ["style"] };
+
+        // Callback function to execute when mutations are observed
+        const callback = (mutationList, observer) => {
+            // debugger;
+            for (const mutation of mutationList) {
+                // && mutation.addedNodes[0].classList.contains("ace_autocomplete")
+                // if( mutation.type === "attributes" && mutation.target.classList.contains("ace_autocomplete")){
+                //     // debugger;
+                // }
+                if (mutation.type === "childList"
+                    // /**/&&
+                    && ("addedNodes" in mutation)
+                    && mutation.addedNodes.length > 0
+                    && mutation.addedNodes[0].classList.contains("ace_autocomplete")
+                ) {
+
+                    let auto = mutation.addedNodes[0];
+                    // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+                    const myObserver = new ResizeObserver(entries => {
+
+                        entries.forEach(entry => {
+                            console.log('width', entry.contentRect.width);
+                            console.log('height', entry.contentRect.height);
+                            let target = entry.target;
+                            // let height = entry.contentRect.height;
+                            let height = 100 // in pixels
+                            if(height != 0){
+                                // debugger;
+                                let bounds = editor.container.getBoundingClientRect()
+                                target.style.top = (bounds.y - 1.01 * height)+"px"
+                                target.style.height = height + "px"
+                            }
+
+                        });
+                    });
+
+                    myObserver.observe(auto);
+                    // let height = auto.style.height;
+                    // let height = "50px"
+                    // auto.style.top = "-20px"
+                    // // debugger;
+                    // console.log("An ace_autocomplete has been added or removed.");
+                }
+            }
+        };
+        //
+        // // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+
+        observer.observe(document.body, config )
+
+
+
+
         window.editor = editor;
         return editor;
     }
@@ -263,6 +337,7 @@ class MathEditorModule {
         }
 
         editor.completers.push(staticWordCompleter)
+
     }
 
     __set_editor_commands(editor, isInline){
@@ -280,31 +355,21 @@ class MathEditorModule {
 
 
         // debugger
-        // editor.container.addEventListener("keydown", e=>{
-        //     debugger
-        // })
         editor.commands.addCommand({
             name: 'deleteMe',
             bindKey: {win: 'backspace', mac: 'backspace'},
             exec: function(editor){
                 // debugger;
-                // editor.removeWordLeft()
                 let value = editor.getValue()
                 console.log(value)
                 if(value.length === 0){
                     // user wants to delete the editor box ...
-                    // debugger;
                     let index = quill.getSelection().index;
                     quill.deleteText(index, 1)
                     tooltip.hide()
-
                 }
 
                 return false; // must return false in order to fire the default event:https://stackoverflow.com/a/42020190/21646295
-                // if(value.length === 0){
-                //     debugger
-                //     let index = quill.getSelection().index;
-                // }
 
             }
         })
@@ -338,6 +403,8 @@ class MathEditorModule {
                 this.updateSize(null, editor.renderer)
                 editor.focus()
             }
+
+
         })
     }
 
@@ -451,7 +518,6 @@ class MathEditorModule {
                         matheditormodule = quill.getModule("MathEditorModule"),
                         tooltip = matheditormodule.tooltip
                     // debugger;
-                    console.log("hey!")
                     console.log("backspace pressed while editing latex. ", range, context)
                     let prefix = context.prefix;
                     if (context.format.hasOwnProperty("code-block")) {
