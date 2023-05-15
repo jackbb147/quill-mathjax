@@ -97,6 +97,7 @@ class MathEditorModule {
                 //  ;
                 let begin = this.lastClickedIndex
                 let count = 1
+                // TODO refactor this ... omg so ugly
                 quill.deleteText(begin, count, 'silent')
                 quill.insertEmbed(begin, 'mathbox-inline', formula, Quill.sources.USER);
                 this.tooltip.hide()
@@ -350,6 +351,46 @@ class MathEditorModule {
 
             }
         })
+
+        if(!isInline){
+
+            let convertEditorToMath = this.getConvertEditorToMathHandler(isInline)
+            editor.commands.addCommand({
+                name: "exit me, down",
+                bindKey: {win: "Down", mac: "Down"},
+                exec: function(editor){
+
+                    let cursorPosition = editor.selection.getCursor();
+                    let numLines = editor.session.getLength() //number of lines
+                    if(cursorPosition.row === numLines - 1){
+                        // user is pressing down arrow at the last line... so the user wants to exit
+
+                        // debugger;
+                        convertEditorToMath(editor)
+
+                    }
+                    return false;
+                }
+            })
+            editor.commands.addCommand({
+                name: "exit me, up",
+                bindKey: {win: "Up", mac: "Up"},
+                exec: function(editor){
+
+                    let cursorPosition = editor.selection.getCursor();
+                    let numLines = editor.session.getLength() //number of lines
+                    if(cursorPosition.row === 0){
+                        // user is pressing up arrow at the first line... so the user wants to exit
+
+                        // debugger;
+                        convertEditorToMath(editor)
+
+                    }
+                    return false;
+                }
+            })
+        }
+
     }
 
     __set_up_live_preview(editor, isInline){
@@ -387,11 +428,9 @@ class MathEditorModule {
             tooltip.root.innerHTML = `<span class="ql-tooltip-arrow"></span>${typesetted.outerHTML}`;
 
             if (isInline) {
-
                 this.updateSize(null, editor.renderer)
                 editor.focus()
             }
-
 
         })
     }
